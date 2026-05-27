@@ -1,0 +1,168 @@
+[gd_scene format=3 uid="uid://dbhpydr53pxhj"]
+
+[ext_resource type="PackedScene" uid="uid://csnpsg3ia1urn" path="res://BaseUnit.tscn" id="1_g4c06"]
+[ext_resource type="Texture2D" uid="uid://pimwocjor45k" path="res://asset/solider/Player.png" id="2_1rbgx"]
+[ext_resource type="Script" uid="uid://bgosyxu5s30fd" path="res://player_cavalry.gd" id="2_m61en"]
+[ext_resource type="Texture2D" uid="uid://chtfsrfefi8k5" path="res://asset/solider/Dead.png" id="4_s87lh"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_m61en"]
+size = Vector2(255, 291)
+
+[sub_resource type="Animation" id="Animation_s87lh"]
+resource_name = "Attack"
+length = 0.6
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Sprite2D:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.1, 0.2, 0.3, 0.4),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1),
+"update": 1,
+"values": [6, 7, 8, 9, 10]
+}
+tracks/1/type = "method"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath(".")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0.3),
+"transitions": PackedFloat32Array(1),
+"values": [{
+"args": [],
+"method": &"melee_attack"
+}]
+}
+
+[sub_resource type="Animation" id="Animation_ai054"]
+resource_name = "Death"
+length = 1.4
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("DeathSprite2D:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1, 1.1, 1.2, 1.3),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1),
+"update": 1,
+"values": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
+}
+
+[sub_resource type="Animation" id="Animation_m61en"]
+resource_name = "Idle"
+length = 0.1
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Sprite2D:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [5]
+}
+
+[sub_resource type="Animation" id="Animation_kkyaw"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Sprite2D:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [0]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("DeathSprite2D:frame")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [0]
+}
+
+[sub_resource type="Animation" id="Animation_yh76t"]
+resource_name = "Run"
+length = 0.6
+loop_mode = 1
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Sprite2D:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.1, 0.2, 0.3, 0.4, 0.5),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1),
+"update": 1,
+"values": [0, 1, 2, 3, 4, 5]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_ai054"]
+_data = {
+&"Attack": SubResource("Animation_s87lh"),
+&"Death": SubResource("Animation_ai054"),
+&"Idle": SubResource("Animation_m61en"),
+&"RESET": SubResource("Animation_kkyaw"),
+&"Run": SubResource("Animation_yh76t")
+}
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_s87lh"]
+bg_color = Color(0.54509807, 0.7647059, 0.2901961, 0.7058824)
+
+[node name="Player" unique_id=413328867 instance=ExtResource("1_g4c06")]
+scale = Vector2(0.6, 0.6)
+script = ExtResource("2_m61en")
+max_hp = 1000
+damage = 50
+
+[node name="Sprite2D" parent="." index="0" unique_id=1173438352]
+position = Vector2(94.25, -147.7344)
+texture = ExtResource("2_1rbgx")
+hframes = 6
+vframes = 2
+
+[node name="CollisionShape2D" parent="." index="1" unique_id=34924818]
+position = Vector2(109.5, -192.5)
+shape = SubResource("RectangleShape2D_m61en")
+
+[node name="AnimationPlayer" parent="." index="2" unique_id=878171937]
+libraries/ = SubResource("AnimationLibrary_ai054")
+autoplay = &"Run"
+
+[node name="RayCast2D" parent="." index="3" unique_id=70071803]
+position = Vector2(108.33333, -161.66666)
+target_position = Vector2(200, 30)
+
+[node name="DeathSprite2D" type="Sprite2D" parent="." index="4" unique_id=198990505]
+visible = false
+texture = ExtResource("4_s87lh")
+hframes = 7
+vframes = 2
+
+[node name="Camera2D" type="Camera2D" parent="." index="5" unique_id=1330220663]
+position = Vector2(116.666664, -166.66666)
+zoom = Vector2(1.5, 1.5)
+position_smoothing_enabled = true
+
+[node name="ProgressBar" type="ProgressBar" parent="." index="6" unique_id=1594415984]
+offset_top = -365.0
+offset_right = 210.0
+offset_bottom = -338.0
+theme_override_styles/fill = SubResource("StyleBoxFlat_s87lh")

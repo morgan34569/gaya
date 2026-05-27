@@ -1,0 +1,325 @@
+[gd_scene format=3 uid="uid://csnni25ngt134"]
+
+[ext_resource type="Script" uid="uid://cu8v4o302a4yr" path="res://world_map.gd" id="1_y2wwp"]
+[ext_resource type="Texture2D" uid="uid://b1kmrx2nt6bu5" path="res://asset/WorldMap.png" id="2_aypb6"]
+[ext_resource type="Texture2D" uid="uid://dt5ddokmge780" path="res://asset/Ribbons/Ribbon_Red_3Slides.png" id="3_d26g4"]
+[ext_resource type="Script" uid="uid://c5jniaahk1hl8" path="res://world_map_camera.gd" id="3_eceo5"]
+[ext_resource type="Texture2D" uid="uid://pdte86klk0mj" path="res://asset/Buttons/Button_Red_3Slides.png" id="4_psonl"]
+[ext_resource type="Texture2D" uid="uid://dw6fwlmx0x4jg" path="res://asset/Banners/Carved_Regular.png" id="5_pf4w3"]
+[ext_resource type="Texture2D" uid="uid://bql54mraw2ob" path="res://asset/Buttons/Button_Disable_3Slides.png" id="6_yrjga"]
+[ext_resource type="AudioStream" uid="uid://fh1b5382lslm" path="res://롤 벤픽 브금.mp3" id="8_psonl"]
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_n2bu3"]
+texture = ExtResource("3_d26g4")
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_x8jqw"]
+texture = ExtResource("4_psonl")
+texture_margin_bottom = 10.0
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_7iv8c"]
+texture = ExtResource("5_pf4w3")
+texture_margin_left = 30.0
+texture_margin_top = 30.0
+texture_margin_right = 30.0
+texture_margin_bottom = 30.0
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_rbvnu"]
+texture = ExtResource("6_yrjga")
+texture_margin_left = 20.0
+texture_margin_top = 10.0
+texture_margin_right = 20.0
+texture_margin_bottom = 20.0
+
+[node name="WorldMap" type="Node2D" unique_id=204936373]
+script = ExtResource("1_y2wwp")
+
+[node name="MapSprite" type="Sprite2D" parent="." unique_id=1474504112]
+position = Vector2(792, 505)
+texture = ExtResource("2_aypb6")
+
+[node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=650831393]
+
+[node name="ResourceBar" type="Panel" parent="CanvasLayer" unique_id=724453816]
+offset_right = 1584.0
+offset_bottom = 40.0
+
+[node name="HBoxContainer" type="HBoxContainer" parent="CanvasLayer/ResourceBar" unique_id=416963399]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="GoldLabel" type="Label" parent="CanvasLayer/ResourceBar/HBoxContainer" unique_id=1283088851]
+layout_mode = 2
+
+[node name="WoodLabel" type="Label" parent="CanvasLayer/ResourceBar/HBoxContainer" unique_id=1281759413]
+layout_mode = 2
+
+[node name="FoodLabel" type="Label" parent="CanvasLayer/ResourceBar/HBoxContainer" unique_id=1102148757]
+layout_mode = 2
+
+[node name="IronLabel" type="Label" parent="CanvasLayer/ResourceBar/HBoxContainer" unique_id=1364479669]
+layout_mode = 2
+
+[node name="InvasionPanel" type="Panel" parent="CanvasLayer" unique_id=1652240199]
+anchors_preset = -1
+anchor_left = 0.5730972
+anchor_top = 0.409
+anchor_right = 0.53477085
+anchor_bottom = 1.0427408
+offset_left = -492.208
+offset_top = -225.03201
+offset_right = 511.94397
+offset_bottom = -500.69604
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 4
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxTexture_n2bu3")
+metadata/_edit_use_anchors_ = true
+
+[node name="InvasionLabel" type="Label" parent="CanvasLayer/InvasionPanel" unique_id=202072797]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 23.0
+grow_horizontal = 2
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="InvasionButton" type="Button" parent="CanvasLayer/InvasionPanel" unique_id=1290685660]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -148.5
+offset_top = -45.0
+offset_right = 148.5
+offset_bottom = -3.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_styles/normal = SubResource("StyleBoxTexture_x8jqw")
+text = "전투 돌입"
+
+[node name="CityPanel" type="Panel" parent="CanvasLayer" unique_id=365863202]
+visible = false
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 205.0
+offset_top = 108.0
+offset_right = -135.0
+offset_bottom = -36.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 4
+
+[node name="CloseButton" type="Button" parent="CanvasLayer/CityPanel" unique_id=7507812]
+layout_mode = 0
+offset_left = 765.0
+offset_top = 3.0
+offset_right = 810.0
+offset_bottom = 34.0
+text = "닫기 "
+
+[node name="VBoxContainer" type="VBoxContainer" parent="CanvasLayer/CityPanel" unique_id=979608679]
+layout_mode = 0
+offset_right = 759.0
+offset_bottom = 503.0
+
+[node name="FarmButton" type="Button" parent="CanvasLayer/CityPanel/VBoxContainer" unique_id=960818433]
+layout_mode = 2
+
+[node name="LumberButton" type="Button" parent="CanvasLayer/CityPanel/VBoxContainer" unique_id=1648182301]
+layout_mode = 2
+
+[node name="MineButton" type="Button" parent="CanvasLayer/CityPanel/VBoxContainer" unique_id=1593591476]
+layout_mode = 2
+
+[node name="WarriorUpgradeButton" type="Button" parent="CanvasLayer/CityPanel/VBoxContainer" unique_id=830194982]
+layout_mode = 2
+text = "
+"
+
+[node name="LancerUpgradeButton" type="Button" parent="CanvasLayer/CityPanel/VBoxContainer" unique_id=528554940]
+layout_mode = 2
+text = "
+"
+
+[node name="ArcherUpgradeButton" type="Button" parent="CanvasLayer/CityPanel/VBoxContainer" unique_id=581948573]
+layout_mode = 2
+text = "
+"
+
+[node name="GeumgwanTradeButton" type="Button" parent="CanvasLayer/CityPanel/VBoxContainer" unique_id=1229454360]
+layout_mode = 2
+text = "
+"
+
+[node name="SogayaFishButton" type="Button" parent="CanvasLayer/CityPanel/VBoxContainer" unique_id=1191705492]
+layout_mode = 2
+text = "
+"
+
+[node name="GoryeongSilkButton" type="Button" parent="CanvasLayer/CityPanel/VBoxContainer" unique_id=897262319]
+layout_mode = 2
+text = "
+"
+
+[node name="SeongsanIronButton" type="Button" parent="CanvasLayer/CityPanel/VBoxContainer" unique_id=2140725974]
+layout_mode = 2
+text = "
+"
+
+[node name="AragayaForgeButton" type="Button" parent="CanvasLayer/CityPanel/VBoxContainer" unique_id=561296256]
+layout_mode = 2
+text = "
+"
+
+[node name="GenStatButton" type="Button" parent="CanvasLayer/CityPanel/VBoxContainer" unique_id=207424081]
+layout_mode = 2
+
+[node name="GenQButton" type="Button" parent="CanvasLayer/CityPanel/VBoxContainer" unique_id=1194531434]
+layout_mode = 2
+
+[node name="GenWButton" type="Button" parent="CanvasLayer/CityPanel/VBoxContainer" unique_id=1223376579]
+layout_mode = 2
+
+[node name="GenEButton" type="Button" parent="CanvasLayer/CityPanel/VBoxContainer" unique_id=1203546614]
+layout_mode = 2
+
+[node name="GenRButton" type="Button" parent="CanvasLayer/CityPanel/VBoxContainer" unique_id=1615948728]
+layout_mode = 2
+
+[node name="ResetMilitaryButton" type="Button" parent="CanvasLayer/CityPanel/VBoxContainer" unique_id=220658192]
+layout_mode = 2
+text = "군사 특성 초기화(80% 환불)"
+
+[node name="EndingPanel" type="Panel" parent="CanvasLayer" unique_id=1190407086]
+anchors_preset = 14
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_bottom = 142.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxTexture_7iv8c")
+
+[node name="Label" type="Label" parent="CanvasLayer/EndingPanel" unique_id=381866380]
+layout_mode = 1
+anchors_preset = 14
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_top = -55.0
+offset_bottom = 29.5
+grow_horizontal = 2
+grow_vertical = 2
+text = "🎉 가야 연맹 통일! 🎉
+마침내 대가야가 모든 외적을 몰아내고철의 왕국을 완성했습니다!
+플레이해주셔서 감사합니다."
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="EndingCloseButton" type="Button" parent="CanvasLayer/EndingPanel" unique_id=1871288606]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -36.0
+offset_top = -54.0
+offset_right = 36.0
+offset_bottom = -1.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_styles/normal = SubResource("StyleBoxTexture_rbvnu")
+text = "닫기"
+
+[node name="Cities" type="Node2D" parent="." unique_id=1664016325]
+
+[node name="DaegayaButton" type="Button" parent="Cities" unique_id=716212585]
+offset_left = 603.0
+offset_top = 399.0
+offset_right = 804.0
+offset_bottom = 580.0
+flat = true
+
+[node name="GeumgwanGayaButton" type="Button" parent="Cities" unique_id=1613390905 groups=["enemy_cities"]]
+offset_left = 1028.0
+offset_top = 623.0
+offset_right = 1248.0
+offset_bottom = 751.0
+flat = true
+
+[node name="SeongsanGayaButton" type="Button" parent="Cities" unique_id=1078903596 groups=["enemy_cities"]]
+offset_left = 707.0
+offset_top = 233.0
+offset_right = 952.0
+offset_bottom = 338.0
+flat = true
+
+[node name="GoryeongGayaButton" type="Button" parent="Cities" unique_id=818573907 groups=["enemy_cities"]]
+offset_left = 721.0
+offset_top = 91.0
+offset_right = 966.0
+offset_bottom = 210.0
+flat = true
+
+[node name="SoGayaButton" type="Button" parent="Cities" unique_id=669230418 groups=["enemy_cities"]]
+offset_left = 521.0
+offset_top = 751.0
+offset_right = 741.0
+offset_bottom = 879.0
+flat = true
+
+[node name="AraGayaButton" type="Button" parent="Cities" unique_id=1859630315 groups=["enemy_cities"]]
+offset_left = 757.0
+offset_top = 595.0
+offset_right = 986.0
+offset_bottom = 687.0
+flat = true
+
+[node name="Camera2D" type="Camera2D" parent="." unique_id=791122403]
+position = Vector2(781, 483)
+zoom = Vector2(0.8, 0.8)
+limit_left = 0
+limit_top = 0
+limit_right = 1584
+limit_bottom = 1010
+position_smoothing_enabled = true
+script = ExtResource("3_eceo5")
+
+[node name="ResourceTimer" type="Timer" parent="." unique_id=276797752]
+wait_time = 3.0
+autostart = true
+
+[node name="BGMPlayer" type="AudioStreamPlayer" parent="." unique_id=527252367]
+stream = ExtResource("8_psonl")
+volume_db = 3.0
+autoplay = true
+parameters/looping = false
+
+[connection signal="pressed" from="CanvasLayer/CityPanel/CloseButton" to="." method="_on_close_button_pressed"]
+[connection signal="pressed" from="CanvasLayer/CityPanel/VBoxContainer/FarmButton" to="." method="_on_farm_button_pressed"]
+[connection signal="pressed" from="CanvasLayer/CityPanel/VBoxContainer/LumberButton" to="." method="_on_lumber_button_pressed"]
+[connection signal="pressed" from="CanvasLayer/CityPanel/VBoxContainer/MineButton" to="." method="_on_mine_button_pressed"]
+[connection signal="pressed" from="CanvasLayer/CityPanel/VBoxContainer/WarriorUpgradeButton" to="." method="_on_warrior_upgrade_button_pressed"]
+[connection signal="pressed" from="CanvasLayer/CityPanel/VBoxContainer/LancerUpgradeButton" to="." method="_on_lancer_upgrade_button_pressed"]
+[connection signal="pressed" from="CanvasLayer/CityPanel/VBoxContainer/ArcherUpgradeButton" to="." method="_on_archer_upgrade_button_pressed"]
+[connection signal="pressed" from="CanvasLayer/CityPanel/VBoxContainer/GeumgwanTradeButton" to="." method="_on_geumgwan_trade_button_pressed"]
+[connection signal="pressed" from="CanvasLayer/CityPanel/VBoxContainer/SogayaFishButton" to="." method="_on_sogaya_fish_button_pressed"]
+[connection signal="pressed" from="CanvasLayer/CityPanel/VBoxContainer/GoryeongSilkButton" to="." method="_on_goryeong_silk_button_pressed"]
+[connection signal="pressed" from="CanvasLayer/CityPanel/VBoxContainer/SeongsanIronButton" to="." method="_on_seongsan_iron_button_pressed"]
+[connection signal="pressed" from="CanvasLayer/CityPanel/VBoxContainer/AragayaForgeButton" to="." method="_on_aragaya_forge_button_pressed"]
+[connection signal="pressed" from="CanvasLayer/CityPanel/VBoxContainer/GenStatButton" to="." method="_on_gen_stat_button_pressed"]
+[connection signal="pressed" from="CanvasLayer/CityPanel/VBoxContainer/GenQButton" to="." method="_on_gen_q_button_pressed"]
+[connection signal="pressed" from="CanvasLayer/CityPanel/VBoxContainer/GenWButton" to="." method="_on_gen_w_button_pressed"]
+[connection signal="pressed" from="CanvasLayer/CityPanel/VBoxContainer/GenEButton" to="." method="_on_gen_e_button_pressed"]
+[connection signal="pressed" from="CanvasLayer/CityPanel/VBoxContainer/GenRButton" to="." method="_on_gen_r_button_pressed"]
+[connection signal="pressed" from="CanvasLayer/CityPanel/VBoxContainer/ResetMilitaryButton" to="." method="_on_reset_military_button_pressed"]
+[connection signal="pressed" from="CanvasLayer/EndingPanel/EndingCloseButton" to="." method="_on_ending_close_button_pressed"]
+[connection signal="pressed" from="Cities/DaegayaButton" to="." method="_on_daegaya_button_pressed"]
+[connection signal="timeout" from="ResourceTimer" to="." method="_on_resource_timer_timeout"]
