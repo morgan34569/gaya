@@ -1,0 +1,19 @@
+[remap]
+
+importer="mp3"
+type="AudioStreamMP3"
+uid="uid://byl16nn5vntk6"
+path="res://.godot/imported/궁병 공격.mp3-1c06d268e6266dcdcf3159abf6ef9a14.mp3str"
+
+[deps]
+
+source_file="res://BGM/궁병 공격.mp3"
+dest_files=["res://.godot/imported/궁병 공격.mp3-1c06d268e6266dcdcf3159abf6ef9a14.mp3str"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

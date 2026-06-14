@@ -1,0 +1,129 @@
+[gd_scene format=3 uid="uid://dp4ca6ct3b8v1"]
+
+[ext_resource type="Script" uid="uid://21ep8h0vq4jg" path="res://setting_ui.gd" id="1_ylfdr"]
+[ext_resource type="Texture2D" uid="uid://s88ni4d3hao8" path="res://asset/조작법.png" id="2_bpl5e"]
+[ext_resource type="AudioStream" uid="uid://budfm52ent78f" path="res://BGM/switch.mp3" id="3_vcdwp"]
+
+[node name="SettingUI" type="CanvasLayer" unique_id=1129078786]
+process_mode = 3
+layer = 100
+script = ExtResource("1_ylfdr")
+
+[node name="Panel" type="Panel" parent="." unique_id=146959306]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -400.0
+offset_top = -280.0
+offset_right = 400.0
+offset_bottom = 320.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 4
+
+[node name="Label" type="Label" parent="Panel" unique_id=1921591788]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -24.0
+offset_top = -291.5
+offset_right = 24.0
+offset_bottom = -268.5
+grow_horizontal = 2
+grow_vertical = 2
+text = "배경음"
+
+[node name="BGMSlider" type="HSlider" parent="Panel" unique_id=1737666849]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -150.0
+offset_top = -249.0
+offset_right = 150.0
+offset_bottom = -229.0
+grow_horizontal = 2
+grow_vertical = 2
+max_value = 1.0
+step = 0.01
+value = 0.5
+
+[node name="Label2" type="Label" parent="Panel" unique_id=1370507827]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -24.0
+offset_top = -204.5
+offset_right = 24.0
+offset_bottom = -155.5
+grow_horizontal = 2
+grow_vertical = 2
+text = "효과음"
+
+[node name="SFXSlider" type="HSlider" parent="Panel" unique_id=169955461]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -150.0
+offset_top = -157.0
+offset_right = 150.0
+offset_bottom = -137.0
+grow_horizontal = 2
+grow_vertical = 2
+max_value = 1.0
+step = 0.01
+value = 0.5
+
+[node name="CloseButton" type="Button" parent="Panel" unique_id=1578018995]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -40.0
+offset_bottom = 31.0
+grow_horizontal = 0
+text = "닫기"
+
+[node name="TextureRect" type="TextureRect" parent="Panel" unique_id=1125806120]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -278.5
+offset_top = -428.0
+offset_right = 513.5
+offset_bottom = -4.0
+grow_horizontal = 2
+grow_vertical = 0
+texture = ExtResource("2_bpl5e")
+expand_mode = 1
+stretch_mode = 4
+
+[node name="UIClickSound" type="AudioStreamPlayer" parent="." unique_id=197615208]
+process_mode = 3
+stream = ExtResource("3_vcdwp")
+bus = &"SFX"
+
+[node name="SFXTestSound" type="AudioStreamPlayer" parent="." unique_id=1088969219]
+process_mode = 3
+stream = ExtResource("3_vcdwp")
+bus = &"SFX"
+
+[connection signal="value_changed" from="Panel/BGMSlider" to="." method="_on_bgm_slider_value_changed"]
+[connection signal="value_changed" from="Panel/SFXSlider" to="." method="_on_sfx_slider_value_changed"]
+[connection signal="pressed" from="Panel/CloseButton" to="." method="close_settings"]

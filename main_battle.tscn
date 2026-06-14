@@ -9,12 +9,17 @@
 [ext_resource type="Texture2D" uid="uid://vsltf20ytfcn" path="res://asset/Bridge_All.png" id="6_g0g58"]
 [ext_resource type="Texture2D" uid="uid://bql54mraw2ob" path="res://asset/Buttons/Button_Disable_3Slides.png" id="7_thwl8"]
 [ext_resource type="Texture2D" uid="uid://dwjoxl4de3a1h" path="res://asset/Terrain/Tileset/Tilemap_color3.png" id="7_wkuru"]
+[ext_resource type="Texture2D" uid="uid://bvyufgsfe08k4" path="res://asset/Icons/Regular_02.png" id="8_lc7rc"]
 [ext_resource type="Texture2D" uid="uid://dg3y57j1wjnfm" path="res://asset/Terrain/Tileset/Tilemap_color1.png" id="9_8fr6l"]
 [ext_resource type="Texture2D" uid="uid://bamf63hhls01n" path="res://asset/Terrain/Decorations/Clouds/Clouds_01.png" id="10_thwl8"]
 [ext_resource type="Texture2D" uid="uid://co7qvi8sj48mk" path="res://asset/Terrain/Decorations/Clouds/Clouds_02.png" id="11_8fr6l"]
 [ext_resource type="Texture2D" uid="uid://i22fnoesdi5q" path="res://asset/Terrain/Decorations/Clouds/Clouds_03.png" id="12_thwl8"]
 [ext_resource type="Texture2D" uid="uid://ctdarjqu63ah5" path="res://asset/Terrain/Tileset/sky.jpg" id="13_y54ie"]
 [ext_resource type="AudioStream" uid="uid://b83i1ec28d0hd" path="res://Glorious morning.mp3" id="15_y54ie"]
+[ext_resource type="AudioStream" uid="uid://bk1n4w8dmbku0" path="res://BGM/skill_R.mp3" id="16_klgvc"]
+[ext_resource type="AudioStream" uid="uid://h8g1irkcuamh" path="res://BGM/broken.mp3" id="17_q3b0y"]
+[ext_resource type="AudioStream" uid="uid://budfm52ent78f" path="res://BGM/switch.mp3" id="18_1vute"]
+[ext_resource type="AudioStream" uid="uid://dqgln6jlf20rx" path="res://BGM/nafal.mp3" id="18_c8bwk"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_iwwip"]
 size = Vector2(302, 204)
@@ -1990,6 +1995,7 @@ position = Vector2(1514, 513)
 collision_layer = 5
 script = ExtResource("2_0hae8")
 is_ally = false
+max_hp = 1000
 metadata/_edit_group_ = true
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="EnemyBase" unique_id=1574977257]
@@ -2060,10 +2066,10 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -110.0
-offset_top = 35.0
-offset_right = 110.0
-offset_bottom = 75.0
+offset_left = -162.0
+offset_top = 84.5
+offset_right = 162.0
+offset_bottom = 167.5
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_constants/separation = 50
@@ -2113,18 +2119,42 @@ theme_override_constants/separation = 30
 
 [node name="WarriorButton" type="Button" parent="CanvasLayer/SpawnButtonContainer" unique_id=2015219058]
 layout_mode = 2
+focus_mode = 0
 text = "보병 소환(30G)
 "
 
 [node name="LancerButton" type="Button" parent="CanvasLayer/SpawnButtonContainer" unique_id=1369987010]
 layout_mode = 2
+focus_mode = 0
 text = "창병 소환(40G)
 "
 
 [node name="ArcherButton" type="Button" parent="CanvasLayer/SpawnButtonContainer" unique_id=1652861226]
 layout_mode = 2
+focus_mode = 0
 text = "궁병 소환(50G)
 "
+
+[node name="NotificationLabel" type="Label" parent="CanvasLayer" unique_id=1509656421]
+anchors_preset = 14
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_top = -11.5
+offset_bottom = 11.5
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(1, 0, 0, 1)
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="SettingButton" type="Button" parent="CanvasLayer" unique_id=1975569205]
+offset_left = 1083.0
+offset_top = 6.0
+offset_right = 1155.0
+offset_bottom = 78.0
+icon = ExtResource("8_lc7rc")
+flat = true
 
 [node name="GoldTimer" type="Timer" parent="." unique_id=1459139314]
 autostart = true
@@ -2146,8 +2176,36 @@ scale = Vector2(7.34363, 3.2061853)
 texture = ExtResource("13_y54ie")
 
 [node name="BGMplayer" type="AudioStreamPlayer" parent="." unique_id=605547676]
+process_mode = 3
 stream = ExtResource("15_y54ie")
 autoplay = true
+bus = &"BGM"
+
+[node name="SkillSound" type="AudioStreamPlayer2D" parent="." unique_id=855191786]
+stream = ExtResource("16_klgvc")
+max_polyphony = 5
+bus = &"SFX"
+
+[node name="BuildingDestroySound" type="AudioStreamPlayer" parent="." unique_id=738955656]
+process_mode = 3
+stream = ExtResource("17_q3b0y")
+volume_db = 5.0
+bus = &"SFX"
+
+[node name="ResultBGM" type="AudioStreamPlayer" parent="." unique_id=416563817]
+process_mode = 3
+bus = &"SFX"
+
+[node name="UIClickSound" type="AudioStreamPlayer" parent="." unique_id=1836109639]
+process_mode = 3
+stream = ExtResource("18_1vute")
+bus = &"SFX"
+
+[node name="SpawnSound" type="AudioStreamPlayer" parent="." unique_id=856464971]
+stream = ExtResource("18_c8bwk")
+volume_db = 0.05
+max_polyphony = 5
+bus = &"SFX"
 
 [connection signal="timeout" from="EnemySpawnTimer" to="." method="_on_enemy_spawn_timer_timeout"]
 [connection signal="pressed" from="CanvasLayer/GameOverPanel/HBoxContainer/RetryButton" to="." method="_on_retry_button_pressed"]
@@ -2155,4 +2213,5 @@ autoplay = true
 [connection signal="pressed" from="CanvasLayer/SpawnButtonContainer/WarriorButton" to="." method="_on_warrior_button_pressed"]
 [connection signal="pressed" from="CanvasLayer/SpawnButtonContainer/LancerButton" to="." method="_on_lancer_button_pressed"]
 [connection signal="pressed" from="CanvasLayer/SpawnButtonContainer/ArcherButton" to="." method="_on_button_pressed"]
+[connection signal="pressed" from="CanvasLayer/SettingButton" to="." method="_on_setting_button_pressed"]
 [connection signal="timeout" from="GoldTimer" to="." method="_on_gold_timer_timeout"]

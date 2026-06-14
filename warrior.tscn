@@ -3,6 +3,8 @@
 [ext_resource type="PackedScene" uid="uid://csnpsg3ia1urn" path="res://BaseUnit.tscn" id="1_pkbmn"]
 [ext_resource type="Texture2D" uid="uid://brx8urdlhn44c" path="res://asset/solider/Warrior_Blue.png" id="2_373gj"]
 [ext_resource type="Texture2D" uid="uid://chtfsrfefi8k5" path="res://asset/solider/Dead.png" id="3_373gj"]
+[ext_resource type="AudioStream" uid="uid://cx26mjv6uyanl" path="res://BGM/일반 공격.mp3" id="4_7o7qx"]
+[ext_resource type="AudioStream" uid="uid://c551dc5v77ah5" path="res://BGM/Death.mp3" id="5_xu1gf"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_7o7qx"]
 size = Vector2(101, 93)
@@ -140,3 +142,12 @@ offset_top = -84.0
 offset_right = 51.0
 offset_bottom = -57.0
 theme_override_styles/fill = SubResource("StyleBoxFlat_373gj")
+
+[node name="AttackSound" type="AudioStreamPlayer2D" parent="." index="6" unique_id=1612489665]
+stream = ExtResource("4_7o7qx")
+max_polyphony = 5
+
+[node name="DeathSound" type="AudioStreamPlayer2D" parent="." index="7" unique_id=777152890]
+stream = ExtResource("5_xu1gf")
+volume_db = 5.0
+max_polyphony = 5

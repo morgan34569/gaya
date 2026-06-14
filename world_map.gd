@@ -1,5 +1,16 @@
 extends Node2D
 
+@onready var notification_label = $CanvasLayer/NotificationLabel
+@onready var upgrade_sound = get_node_or_null("UpgradeSoundPlayer")
+@onready var error_sound = get_node_or_null("ErrorSoundPlayer")
+@onready var refund_sound = get_node_or_null("RefundSoundPlayer")
+@onready var event_alert_sound = get_node_or_null("EventAlertSound")
+@onready var ending_cheer_sound = get_node_or_null("EndingCheerSound")
+@onready var ui_click_sound = get_node_or_null("UIClickSound")
+
+# 💡 알림창 깜빡임 방지를 위한 애니메이션 변수 추가
+var noti_tween: Tween
+
 # 상단 자원 UI 노드
 @onready var gold_label = $CanvasLayer/ResourceBar/HBoxContainer/GoldLabel
 @onready var wood_label = $CanvasLayer/ResourceBar/HBoxContainer/WoodLabel
@@ -23,7 +34,8 @@ extends Node2D
 @onready var warrior_up_btn = $CanvasLayer/CityPanel/VBoxContainer/WarriorUpgradeButton
 @onready var lancer_up_btn = $CanvasLayer/CityPanel/VBoxContainer/LancerUpgradeButton
 @onready var archer_up_btn = $CanvasLayer/CityPanel/VBoxContainer/ArcherUpgradeButton
-# 이벤트 발생시 
+
+# 이벤트 발생시
 @onready var invasion_panel = $CanvasLayer/InvasionPanel
 @onready var invasion_label = $CanvasLayer/InvasionPanel/InvasionLabel
 @onready var invasion_button = $CanvasLayer/InvasionPanel/InvasionButton
@@ -35,7 +47,8 @@ var pending_invasion_target: String = ""
 @onready var gen_w_btn = $CanvasLayer/CityPanel/VBoxContainer/GenWButton
 @onready var gen_e_btn = $CanvasLayer/CityPanel/VBoxContainer/GenEButton
 @onready var gen_r_btn = $CanvasLayer/CityPanel/VBoxContainer/GenRButton
-# 초기화 버튼  
+
+# 초기화 및 엔딩 버튼  
 @onready var reset_military_btn = $CanvasLayer/CityPanel/VBoxContainer/ResetMilitaryButton
 @onready var ending_panel = $CanvasLayer/EndingPanel
 
@@ -45,6 +58,7 @@ func _ready():
 	if city_panel: city_panel.visible = false
 	if invasion_panel: invasion_panel.visible = false # 침공 경고창 숨기기
 	if ending_panel: ending_panel.visible = false
+	
 	# 2. 침공 경고창의 '전투 돌입' 버튼 시그널 연결
 	if invasion_button:
 		invasion_button.pressed.connect(_on_invasion_button_pressed)
@@ -63,12 +77,11 @@ func _ready():
 			# 아직 점령하지 않은 땅
 			enemy_btn.pressed.connect(_on_enemy_city_pressed.bind(enemy_btn.name))
 
-	# 5. 💡 월드맵 진입 시 침공 이벤트(백제/신라/고구려)가 있는지 체크!
+	# 5. 월드맵 진입 시 침공 이벤트(백제/신라/고구려)가 있는지 체크!
 	check_invasion_events()
 	check_ending_event()
-	
 
-# 💡 [새로 추가] 침공 이벤트 체크 함수
+
 func check_invasion_events():
 	var conquered_gaya = Global.unlocked_territories.size() - 1 # 대가야(수도)를 제외한 점령 국가 수
 	
@@ -84,6 +97,8 @@ func check_invasion_events():
 
 func trigger_invasion(event_id: String, country_name: String):
 	pending_invasion_target = event_id # 쳐들어온 국가 기억
+	if event_alert_sound:
+		event_alert_sound.play()
 	
 	# 침공 국가에 따라 비장한 경고 메시지 띄우기
 	if event_id == "Baekje_Invasion":
@@ -94,7 +109,7 @@ func trigger_invasion(event_id: String, country_name: String):
 		invasion_label.text = "🔥 [국가 비상사태] 🔥\n고구려 개마무사 대군이 남하하고 있습니다!!\n가야 연맹의 명운을 건 총력전입니다!"
 	
 	invasion_panel.visible = true # 경고창 띄우기!
-	# 경고창의 "전투 돌입" 버튼을 눌렀을 때 실행되는 함수
+	
 func _on_invasion_button_pressed():
 	Global.current_target_city = pending_invasion_target
 	get_tree().change_scene_to_file("res://main_battle.tscn")
@@ -126,7 +141,6 @@ func open_city_panel(city_name: String):
 	gen_e_btn.visible = false
 	gen_r_btn.visible = false
 	reset_military_btn.visible = false
-	
 	
 	# 2. 선택한 도시의 버튼만 켜기
 	if city_name == "DaegayaButton":
@@ -187,7 +201,7 @@ func update_building_ui():
 	if Global.archer_level >= 5: archer_up_btn.text = "🏹 궁병 강화 Lv.MAX (최대 레벨)"
 	else: archer_up_btn.text = "🏹 궁병 강화 Lv." + str(Global.archer_level) + " (비용: 식량 " + str(Global.archer_level * 80) + " / 철 " + str(Global.archer_level * 80) + " / 금 " + str(Global.archer_level * 80) + ")"
 
-	# [만렙 제한 5] 장군 훈련소 UI 갱신 (비용이 아주 비쌉니다!)
+	# [만렙 제한 5] 장군 훈련소 UI 갱신
 	if Global.gen_stat_level >= 5: gen_stat_btn.text = "👑 장군 기본 훈련 Lv.MAX"
 	else: gen_stat_btn.text = "👑 장군 기본 훈련 Lv." + str(Global.gen_stat_level) + " (금 " + str(Global.gen_stat_level * 200) + ")"
 	
@@ -205,10 +219,16 @@ func update_building_ui():
 
 # --- [상호작용 함수들] ---
 
-func _on_daegaya_button_pressed() -> void: open_city_panel("DaegayaButton")
-func _on_close_button_pressed() -> void: if city_panel: city_panel.visible = false
+func _on_daegaya_button_pressed() -> void: 
+	if ui_click_sound: ui_click_sound.play()
+	open_city_panel("DaegayaButton")
+func _on_close_button_pressed() -> void: 
+	if ui_click_sound:
+		ui_click_sound.play()
+	if city_panel: city_panel.visible = false
 
 func _on_enemy_city_pressed(city_name: String):
+	if ui_click_sound: ui_click_sound.play()
 	if Global.unlocked_territories.has(city_name):
 		open_city_panel(city_name)
 	else:
@@ -225,14 +245,13 @@ func _on_resource_timer_timeout() -> void:
 		wood_yield += Global.geumgwan_trade_level * 30
 		iron_yield += Global.geumgwan_trade_level * 10
 		
-	if Global.sogaya_fish_level > 0: food_yield += Global.sogaya_fish_level * 40             
+	if Global.sogaya_fish_level > 0: food_yield += Global.sogaya_fish_level * 40
 	if Global.goryeong_silk_level > 0: wood_yield += Global.goryeong_silk_level * 50
-	if Global.seongsan_iron_level > 0: iron_yield += Global.seongsan_iron_level * 15         
+	if Global.seongsan_iron_level > 0: iron_yield += Global.seongsan_iron_level * 15
 		
 	Global.total_food += food_yield
 	Global.total_wood += wood_yield
 	Global.total_iron += iron_yield
-	# 골드는 이제 전투 보상으로만 얻습니다.
 	
 	update_resource_ui()
 
@@ -243,45 +262,66 @@ func _on_farm_button_pressed() -> void:
 	var gold_cost = Global.farm_level * 100
 	
 	if Global.farm_level >= 5:
-		print("창고에 곡식이 산처럼 쌓여, 더 이상 개간할 영지가 없습니다.")
+		show_notification("창고에 곡식이 산처럼 쌓여, 더 이상 개간할 영지가 없습니다.")
 		return 
 	
 	if Global.total_wood >= wood_cost and Global.total_gold >= gold_cost:
 		Global.total_wood -= wood_cost
 		Global.total_gold -= gold_cost
 		Global.farm_level += 1
+	
+		if upgrade_sound:
+			
+			upgrade_sound.play()
+			
 		update_resource_ui()
 		update_building_ui()
+	else:
+		show_notification("농장을 개간하기엔 자원(목재/금)이 부족합니다!")
 
 func _on_lumber_button_pressed() -> void:
 	var wood_cost = Global.lumber_level * 50
 	var gold_cost = Global.lumber_level * 150
 	
 	if Global.lumber_level >= 5:
-		print("가야의 모든 산맥에서 최고급 목재가 쉴 새 없이 쏟아져 들어오고 있습니다!")
+		show_notification("가야의 모든 산맥에서 최고급 목재가 쉴 새 없이 쏟아져 들어오고 있습니다!")
 		return
 	
 	if Global.total_wood >= wood_cost and Global.total_gold >= gold_cost:
 		Global.total_wood -= wood_cost
 		Global.total_gold -= gold_cost
 		Global.lumber_level += 1
+		
+		if upgrade_sound:
+			upgrade_sound.pitch_scale = randf_range(0.9, 1.1)
+			upgrade_sound.play()
+			
 		update_resource_ui()
 		update_building_ui()
+	else:
+		show_notification("벌목장을 업그레이드하기엔 자원(목재/금)이 부족합니다")
 
 func _on_mine_button_pressed() -> void:
 	var wood_cost = Global.mine_level * 100
 	var gold_cost = Global.mine_level * 200
 	
 	if Global.mine_level >= 5:
-		print("용광로의 불꽃이 밤낮으로 꺼지지 않습니다! 대륙 최고의 철 생산량을 달성했습니다.")
+		show_notification("용광로의 불꽃이 밤낮으로 꺼지지 않습니다! 대륙 최고의 철 생산량을 달성했습니다.")
 		return
 	
 	if Global.total_wood >= wood_cost and Global.total_gold >= gold_cost:
 		Global.total_wood -= wood_cost
 		Global.total_gold -= gold_cost
 		Global.mine_level += 1
+		
+		if upgrade_sound:
+			upgrade_sound.pitch_scale = randf_range(0.9, 1.1)
+			upgrade_sound.play()
+			
 		update_resource_ui()
 		update_building_ui()
+	else:
+		show_notification("대장간을 업그레이드 하기엔 자원(목재/금)이 부족합니다!")
 
 # --- [특산물 건물 업그레이드 로직] ---
 
@@ -290,7 +330,7 @@ func _on_geumgwan_trade_button_pressed() -> void:
 	var gold_cost = 200 + (Global.geumgwan_trade_level * 100)
 	
 	if Global.geumgwan_trade_level >= 3:
-		print("해동 제일의 무역항이 완성되었습니다. 천하의 부가 이곳으로 모여듭니다!")
+		show_notification("해동 제일의 무역항이 완성되었습니다. 천하의 부가 이곳으로 모여듭니다!")
 		return
 	
 	if Global.total_wood >= wood_cost and Global.total_gold >= gold_cost:
@@ -298,77 +338,111 @@ func _on_geumgwan_trade_button_pressed() -> void:
 		Global.total_gold -= gold_cost
 		Global.geumgwan_trade_level += 1
 		
+		if upgrade_sound:
+			upgrade_sound.pitch_scale = randf_range(0.9, 1.1)
+			upgrade_sound.play()
+			
 		# 레벨이 오를수록 들어오는 한탕 수익도 커집니다. 
 		var trade_bonus_gold = 500 + (Global.geumgwan_trade_level * 500)
 		Global.total_gold += trade_bonus_gold
 		
-		print("🚢 금관가야 해상 무역소 레벨 업! 무역 수익으로 금 " + str(trade_bonus_gold) + "을(를) 벌어왔습니다!")
+		show_notification("🚢 금관가야 해상 무역항 레벨 업! 무역 수익으로 금 " + str(trade_bonus_gold) + "을(를) 벌어왔습니다!")
 		
 		update_resource_ui()
 		update_building_ui()
+	else:
+		show_notification("무역항을 업그레이드하기엔 자원(목재/금)이 부족합니다.")
 
 func _on_sogaya_fish_button_pressed() -> void:
 	var wood_cost = 100 + (Global.sogaya_fish_level * 50) 
 	var gold_cost = 150 + (Global.sogaya_fish_level * 50)
 	
 	if Global.sogaya_fish_level >= 3:
-		print("매일 아침 끝없는 바다의 축복이 쏟아집니다! 포구로 돌아오는 모든 어선이 항시 만선을 이룹니다")
+		show_notification("매일 아침 끝없는 바다의 축복이 쏟아집니다! 포구로 돌아오는 모든 어선이 항시 만선을 이룹니다")
 		return
 	
 	if Global.total_wood >= wood_cost and Global.total_gold >= gold_cost:
 		Global.total_wood -= wood_cost
 		Global.total_gold -= gold_cost
 		Global.sogaya_fish_level += 1
+		
+		if upgrade_sound:
+			upgrade_sound.pitch_scale = randf_range(0.9, 1.1)
+			upgrade_sound.play()
+			
 		update_resource_ui()
 		update_building_ui()
+	else:
+		show_notification("수산물 시장을 업그레이드 하기엔 자원(목재/금)이 부족합니다.")
 
 func _on_aragaya_forge_button_pressed() -> void:
 	var wood_cost = 150 + (Global.aragaya_forge_level * 50)
 	var gold_cost = 150 + (Global.aragaya_forge_level * 50)
 	
 	if Global.aragaya_forge_level >= 3:
-		print("천하에 이보다 단단하고 정교한 철갑을 벼려낼 장인은 없습니다!")
+		show_notification("천하에 이보다 단단하고 정교한 철갑을 벼려낼 장인은 없습니다!")
 		return
 	
 	if Global.total_wood >= wood_cost and Global.total_gold >= gold_cost:
 		Global.total_wood -= wood_cost
 		Global.total_gold -= gold_cost
 		Global.aragaya_forge_level += 1
+		
+		if upgrade_sound:
+			upgrade_sound.pitch_scale = randf_range(0.9, 1.1)
+			upgrade_sound.play()
+			
 		update_resource_ui()
 		update_building_ui()
+	else:
+		show_notification("대장간을 업그레이드 하기엔 자원(목재/금)이 부족합니다.")
 
 func _on_goryeong_silk_button_pressed() -> void:
 	var wood_cost = 100 + (Global.goryeong_silk_level * 80) 
 	var gold_cost = 150 + (Global.goryeong_silk_level * 50)
 	
 	if Global.goryeong_silk_level >= 3:
-		print("천년의 숲을 아우르는 거대한 대규모 벌목장이 마침내 완성되었습니다! 수천 명의 벌목꾼과 수레가 산맥을 뒤덮으며 목재 생산의 정점에 도달했습니다")
+		show_notification("천년의 숲을 아우르는 거대한 벌목장이 마침내 완성되었습니다! 목재 생산의 정점에 도달했습니다")
 		return
 	
 	if Global.total_wood >= wood_cost and Global.total_gold >= gold_cost:
 		Global.total_wood -= wood_cost
 		Global.total_gold -= gold_cost
 		Global.goryeong_silk_level += 1
+		
+		if upgrade_sound:
+			upgrade_sound.pitch_scale = randf_range(0.9, 1.1)
+			upgrade_sound.play()
+			
 		update_resource_ui()
 		update_building_ui()
+	else:
+		show_notification("벌목장을 업그레이드 하기엔 자원(목재/금)이 부족합니다.")
 
 func _on_seongsan_iron_button_pressed() -> void:
 	var wood_cost = 200 + (Global.seongsan_iron_level * 100) 
 	var gold_cost = 300 + (Global.seongsan_iron_level * 100)
 	
 	if Global.seongsan_iron_level >= 3:
-		print("철산의 깊은 맥까지 닿았습니다. 이보다 더 거대한 광산은 없습니다!")
+		show_notification("철산의 깊은 맥까지 닿았습니다. 이보다 더 거대한 광산은 없습니다!")
 		return
 	
 	if Global.total_wood >= wood_cost and Global.total_gold >= gold_cost:
 		Global.total_wood -= wood_cost
 		Global.total_gold -= gold_cost
 		Global.seongsan_iron_level += 1
+		
+		if upgrade_sound:
+			upgrade_sound.pitch_scale = randf_range(0.9, 1.1)
+			upgrade_sound.play()
+			
 		update_resource_ui()
 		update_building_ui()
+	else:
+		show_notification("철광맥을 업그레이드 하기엔 자원(목재/금)이 부족합니다.")
 
 
-# --- [병사 강화 업그레이드 로직 (식량, 철, 금 소모)] ---
+# --- [병사 강화 업그레이드 로직] ---
 
 func _on_warrior_upgrade_button_pressed() -> void:
 	var food_cost = Global.warrior_level * 50
@@ -376,7 +450,7 @@ func _on_warrior_upgrade_button_pressed() -> void:
 	var gold_cost = Global.warrior_level * 50
 	
 	if Global.warrior_level >= 5:
-		print("보병은 이미 최고 수준으로 훈련되었습니다!")
+		show_notification("보병은 이미 최고 수준으로 훈련되었습니다!")
 		return
 	
 	if Global.total_food >= food_cost and Global.total_iron >= iron_cost and Global.total_gold >= gold_cost:
@@ -384,10 +458,15 @@ func _on_warrior_upgrade_button_pressed() -> void:
 		Global.total_iron -= iron_cost
 		Global.total_gold -= gold_cost
 		Global.warrior_level += 1
+		
+		if upgrade_sound:
+			upgrade_sound.pitch_scale = randf_range(0.9, 1.1)
+			upgrade_sound.play()
+			
 		update_resource_ui()
 		update_building_ui()
 	else:
-		print("보병을 강화하기엔 자원(식량/철/금)이 부족합니다!")
+		show_notification("보병을 강화하기엔 자원(식량/철/금)이 부족합니다!")
 
 func _on_lancer_upgrade_button_pressed() -> void:
 	var food_cost = Global.lancer_level * 70
@@ -395,7 +474,7 @@ func _on_lancer_upgrade_button_pressed() -> void:
 	var gold_cost = Global.lancer_level * 70
 	
 	if Global.lancer_level >= 5:
-		print("창병은 이미 최고 수준으로 훈련되었습니다")
+		show_notification("창병은 이미 최고 수준으로 훈련되었습니다")
 		return
 	
 	if Global.total_food >= food_cost and Global.total_iron >= iron_cost and Global.total_gold >= gold_cost:
@@ -403,10 +482,15 @@ func _on_lancer_upgrade_button_pressed() -> void:
 		Global.total_iron -= iron_cost
 		Global.total_gold -= gold_cost
 		Global.lancer_level += 1
+		
+		if upgrade_sound:
+			upgrade_sound.pitch_scale = randf_range(0.9, 1.1)
+			upgrade_sound.play()
+			
 		update_resource_ui()
 		update_building_ui()
 	else:
-		print("창병을 강화하기엔 자원(식량/철/금)이 부족합니다!")
+		show_notification("창병을 강화하기엔 자원(식량/철/금)이 부족합니다!")
 
 func _on_archer_upgrade_button_pressed() -> void:
 	var food_cost = Global.archer_level * 80
@@ -414,7 +498,7 @@ func _on_archer_upgrade_button_pressed() -> void:
 	var gold_cost = Global.archer_level * 80
 	
 	if Global.archer_level >= 5:
-		print("궁병은 이미 최고 수준으로 훈련되었습니다!")
+		show_notification("궁병은 이미 최고 수준으로 훈련되었습니다!")
 		return
 	
 	if Global.total_food >= food_cost and Global.total_iron >= iron_cost and Global.total_gold >= gold_cost:
@@ -422,69 +506,114 @@ func _on_archer_upgrade_button_pressed() -> void:
 		Global.total_iron -= iron_cost
 		Global.total_gold -= gold_cost
 		Global.archer_level += 1
+		
+		if upgrade_sound:
+			upgrade_sound.pitch_scale = randf_range(0.9, 1.1)
+			upgrade_sound.play()
+			
 		update_resource_ui()
 		update_building_ui()
 	else:
-		print("궁병을 강화하기엔 자원(식량/철/금)이 부족합니다!")
+		show_notification("궁병을 강화하기엔 자원(식량/철/금)이 부족합니다!")
 		
 
+# --- [장군 강화 로직] ---
 
 func _on_gen_stat_button_pressed() -> void:
 	var cost = Global.gen_stat_level * 200
-	if Global.gen_stat_level >= 5: return
+	# 💡 만렙 알림 추가
+	if Global.gen_stat_level >= 5: 
+		show_notification("장군 훈련은 이미 최고 수준(Lv.MAX)입니다!")
+		return
+	
 	if Global.total_gold >= cost:
 		Global.total_gold -= cost
 		Global.gen_stat_level += 1
+		if upgrade_sound:
+			upgrade_sound.pitch_scale = randf_range(0.9, 1.1)
+			upgrade_sound.play()
 		update_resource_ui()
 		update_building_ui()
-
+	else:
+		show_notification("장군을 강화할 자원(금)이 부족합니다.")
 
 func _on_gen_q_button_pressed() -> void:
 	var cost = Global.gen_q_level * 150
-	if Global.gen_q_level >= 5: return
+	if Global.gen_q_level >= 5: 
+		show_notification("함성(Q) 수련은 이미 최고 수준(Lv.MAX)입니다!")
+		return
+	
 	if Global.total_gold >= cost:
 		Global.total_gold -= cost
 		Global.gen_q_level += 1
+		if upgrade_sound:
+			upgrade_sound.pitch_scale = randf_range(0.9, 1.1)
+			upgrade_sound.play()
 		update_resource_ui()
 		update_building_ui()
-
+	else:
+		show_notification("스킬을 강화할 자원(금)이 부족합니다.")
 
 func _on_gen_w_button_pressed() -> void:
 	var cost = Global.gen_w_level * 150
-	if Global.gen_w_level >= 5: return
+	if Global.gen_w_level >= 5: 
+		show_notification("가시갑옷(W) 수련은 이미 최고 수준(Lv.MAX)입니다!")
+		return
+	
 	if Global.total_gold >= cost:
 		Global.total_gold -= cost
 		Global.gen_w_level += 1
+		if upgrade_sound:
+			upgrade_sound.pitch_scale = randf_range(0.9, 1.1)
+			upgrade_sound.play()
 		update_resource_ui()
 		update_building_ui()
-
+	else:
+		show_notification("스킬을 강화할 자원(금)이 부족합니다.")
 
 func _on_gen_e_button_pressed() -> void:
 	var cost = Global.gen_e_level * 150
-	if Global.gen_e_level >= 5: return
+	if Global.gen_e_level >= 5: 
+		show_notification("돌진(E) 수련은 이미 최고 수준(Lv.MAX)입니다!")
+		return
+	
 	if Global.total_gold >= cost:
 		Global.total_gold -= cost
 		Global.gen_e_level += 1
+		if upgrade_sound:
+			upgrade_sound.pitch_scale = randf_range(0.9, 1.1)
+			upgrade_sound.play()
 		update_resource_ui()
 		update_building_ui()
-
+	else:
+		show_notification("스킬을 강화할 자원(금)이 부족합니다.")
 
 func _on_gen_r_button_pressed() -> void:
 	var cost = Global.gen_r_level * 500
-	if Global.gen_r_level >= 5: return
+	if Global.gen_r_level >= 5: 
+		show_notification("화살비(R) 수련은 이미 최고 수준(Lv.MAX)입니다!")
+		return
+	
 	if Global.total_gold >= cost:
 		Global.total_gold -= cost
 		Global.gen_r_level += 1
+		if upgrade_sound:
+			upgrade_sound.pitch_scale = randf_range(0.9, 1.1)
+			upgrade_sound.play()
 		update_resource_ui()
 		update_building_ui()
+	else:
+		show_notification("스킬을 강화할 자원(금)이 부족합니다.")
 
+
+# --- [군사 특성 초기화] ---
 
 func _on_reset_military_button_pressed():
 	var spent_gold = 0
 	var spent_food = 0
 	var spent_iron = 0
 	
-	# 1. 장군 스킬에 소모된 골드 누적 계산 (for문 활용)
+	# 1. 장군 스킬에 소모된 골드 누적 계산
 	for i in range(1, Global.gen_stat_level): spent_gold += i * 200
 	for i in range(1, Global.gen_q_level): spent_gold += i * 150
 	for i in range(1, Global.gen_w_level): spent_gold += i * 150
@@ -507,17 +636,22 @@ func _on_reset_military_button_pressed():
 		spent_food += i * 80
 		spent_iron += i * 80
 		
-	# 아무것도 업그레이드 안 한 상태(모두 1레벨)라면 함수 조기 종료
+	# 아무것도 업그레이드 안 한 상태라면 함수 조기 종료
 	if spent_gold == 0 and spent_food == 0 and spent_iron == 0:
-		print("초기화할 군사 업그레이드가 없습니다!")
+		show_notification("초기화할 군사 업그레이드가 없습니다!")
 		return
 		
-	# 3. 누적된 총비용의 80%를 계산하여 현재 자원에 환불 (소수점은 버림)
-	Global.total_gold += int(spent_gold * 0.8)
-	Global.total_food += int(spent_food * 0.8)
-	Global.total_iron += int(spent_iron * 0.8)
+	# 3. 누적된 총비용의 80%를 계산하여 변수에 저장
+	var refund_gold = int(spent_gold * 0.8)
+	var refund_food = int(spent_food * 0.8)
+	var refund_iron = int(spent_iron * 0.8)
 	
-	# 4. 모든 군사 및 장군 레벨을 초기 상태(1)로 되돌림
+	# 4. 현재 자원에 환불 반영
+	Global.total_gold += refund_gold
+	Global.total_food += refund_food
+	Global.total_iron += refund_iron
+	
+	# 5. 모든 군사 및 장군 레벨을 초기 상태(1)로 되돌림
 	Global.gen_stat_level = 1
 	Global.gen_q_level = 1
 	Global.gen_w_level = 1
@@ -527,21 +661,58 @@ func _on_reset_military_button_pressed():
 	Global.lancer_level = 1
 	Global.archer_level = 1
 	
-	# 5. UI 및 자원 표기 새로고침
+	# 초기화 시에도 효과음을 기본 톤으로 한 번 재생해 줍니다
+	if refund_sound:
+		refund_sound.play()
+	
+	# 6. UI 및 자원 표기 새로고침
 	update_resource_ui()
 	update_building_ui()
 	
-	print("🔄 군사 특성 초기화 완료! 80% 환불 적용 됨.")
-	print("환불 내역 - 골드: ", int(spent_gold * 0.8), " / 식량: ", int(spent_food * 0.8), " / 철: ", int(spent_iron * 0.8))
+	# 7. 환불 내역 메시지 조립 후 화면에 띄우기
+	var refund_message = "🔄 군사 특성 초기화 (80% 환불)\n"
+	refund_message += str("🪙 금: +", refund_gold, "\n")
+	refund_message += str("🌾 식량: +", refund_food, "\n")
+	refund_message += str("⛏️ 철: +", refund_iron)
 	
-func check_ending_event():
-	# 고구려가 격파되었는지 확인 (이 변수는 기존 침공 이벤트 기획에 맞춰져 있습니다)
-	if Global.is_goguryeo_defeated == true:
-		# 고구려를 꺾었다면 웅장하게 엔딩 팝업 등장!
-		ending_panel.visible = true
+	show_notification(refund_message)
+	
 
+func check_ending_event():
+	if Global.is_goguryeo_defeated == true:
+		ending_panel.visible = true
+		
+		if ending_cheer_sound and not ending_cheer_sound.playing:
+			ending_cheer_sound.play()
 
 func _on_ending_close_button_pressed() -> void:
 	if ending_panel:
 		ending_panel.visible = false
 		print("엔딩 이후 계속 플레이 모드로 진입합니다.")
+
+# 💡 깜빡임 방지 로직이 적용된 알림창 함수
+func show_notification(message: String):
+	if notification_label == null: return
+	
+	notification_label.text = message
+	notification_label.visible = true
+	notification_label.modulate.a = 1.0 
+	
+	# 메시지 안에 특정 단어가 들어가면 자동으로 에러 소리 재생!
+	if "부족" in message or "이미" in message or "없습니다" in message:
+		if error_sound:
+			error_sound.pitch_scale = randf_range(0.9, 1.1) 
+			error_sound.play()
+	
+	# 기존에 실행 중인 애니메이션이 있다면 취소 (깜빡임 방지)
+	if noti_tween and noti_tween.is_valid():
+		noti_tween.kill()
+		
+	# 새 애니메이션 실행
+	noti_tween = create_tween()
+	noti_tween.tween_interval(2.0) 
+	noti_tween.tween_property(notification_label, "modulate:a", 0.0, 1.0)
+	
+func _on_setting_button_pressed() -> void:
+	if ui_click_sound: ui_click_sound.play()
+	SettingUI.open_settings()

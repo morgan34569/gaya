@@ -8,6 +8,14 @@ class_name BaseUnit
 
 var current_hp: int:
 	set(value):
+		
+		if value < current_hp and not is_dead:
+			var hit_sound = get_node_or_null("HitSound")
+			if hit_sound:
+				# 맞을 때마다 소리가 겹치지 않게 약간씩 피치를 다르게 재생
+				hit_sound.pitch_scale = randf_range(0.9, 1.1)
+				hit_sound.play()
+				
 		current_hp = value
 		if hp_bar:
 			hp_bar.value = current_hp
@@ -89,6 +97,7 @@ func move_forward():
 
 func melee_attack():
 	if raycast.is_colliding():
+		$AttackSound.play()
 		var target = raycast.get_collider()
 		if target and "current_hp" in target and target.is_ally != self.is_ally:
 			target.current_hp -= damage
@@ -112,6 +121,9 @@ func die():
 		set_collision_layer_value(i, false)
 		set_collision_mask_value(i, false)
 		
+	var death_sound = get_node_or_null("DeathSound")
+	if death_sound:
+		death_sound.play()
 	# 데스 전용 스프라이트로 교체 후 애니메이션 재생
 	main_sprite.visible = false
 	death_sprite.visible = true

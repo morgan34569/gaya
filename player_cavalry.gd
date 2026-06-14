@@ -1,5 +1,8 @@
 extends "res://base_unit.gd" 
 
+@onready var run_sound = $RunSound
+@onready var skill_sound = $SkillSound # 💡 스킬 전용 효과음 노드 연결!
+
 var is_aura_active: bool = false
 var time_passed: float = 0.0
 var is_dashing: bool = false
@@ -10,6 +13,13 @@ var facing_dir: int = 1          # 현재 바라보는 방향 (1:우, -1:좌)
 var e_skill_cooldown: float = 0.0 # E 스킬 쿨타임
 var dashed_enemies: Array = []   # 한 번의 돌진에서 이미 때린 적을 기억하는 명부
 
+func _ready():
+	# 부모(BaseUnit)의 _ready() 함수를 먼저 실행 (체력 세팅, 피아식별 세팅)
+	super._ready() 
+	
+	# 내 전용 말발굽 소리 세팅 (무한 반복 설정만 하고 시작하자마자 재생하진 않음!)
+	if run_sound and run_sound.stream:
+		run_sound.stream.loop = true 
 
 
 func _physics_process(delta):
@@ -39,13 +49,12 @@ func _physics_process(delta):
 				if global_position.distance_to(node.global_position) < 150:
 					dashed_enemies.append(node) 
 					
-					# 💡 E 스킬 레벨에 따른 넉백/데미지/기절 시간 강화!
+					# E 스킬 레벨에 따른 넉백/데미지/기절 시간 강화!
 					var e_damage = 100 + ((Global.gen_e_level - 1) * 100)       # 100 ~ 500 데미지
 					var e_knockback = 250 + ((Global.gen_e_level - 1) * 50)     # 250 ~ 450 밀치기
 					var e_stun = 0.3 + ((Global.gen_e_level - 1) * 0.15)        # 0.3초 ~ 0.9초 기절
 					
 					if node.has_method("take_knockback"):
-						# 3번째 파라미터로 스턴 시간(e_stun)을 추가로 넘겨줍니다!
 						node.take_knockback(facing_dir * e_knockback, e_damage, e_stun)
 		
 		move_and_slide()
@@ -69,31 +78,55 @@ func _physics_process(delta):
 		dashed_enemies.clear()  # 때린 적 명부 초기화
 		anim_player.play("Run") # 돌진하는 동안 뛸 수 있게
 		set_collision_mask_value(3, false)
+		
+		# 💡 [추가] E 스킬 (기마 돌진) 효과음 재생!
+		if skill_sound:
+			skill_sound.stream = preload("res://BGM/skill_E.mp3")
+			skill_sound.play()
+			
 		print("🐎 장군 기마 돌진 발동!")
 		return # 발동 프레임 종료
 
-	# 5. [기존 일반 이동 로직]
+	# 5. [기존 일반 이동 로직 + 사운드 제어]
 	var input_dir = Input.get_axis("move_left", "move_right")
 	
 	if input_dir != 0:
 		facing_dir = input_dir # 마지막으로 바라본 방향 저장 (돌진할 때 쓰임)
 		velocity.x = input_dir * speed
 		anim_player.play("Run")
+		
+		# 움직일 때 말발굽 소리가 꺼져있다면 켭니다!
+		if run_sound and not run_sound.playing:
+			run_sound.play()
+			
 		main_sprite.flip_h = (input_dir < 0)
 		if raycast:
 			raycast.target_position.x = abs(raycast.target_position.x) * input_dir
 	else:
 		velocity.x = 0
 		anim_player.play("Idle") 
+		
+		# 멈춰 있을 때 말발굽 소리가 나고 있다면 끕니다!
+		if run_sound and run_sound.playing:
+			run_sound.stop()
 
 	if Input.is_action_just_pressed("ui_accept"):
 		anim_player.play("Attack")
 		velocity.x = 0
+		
+		# 공격하느라 멈췄을 때도 말발굽 소리를 끕니다!
+		if run_sound and run_sound.playing:
+			run_sound.stop()
 
 	move_and_slide()
 	
 func die():
 	is_dead = true 
+	
+	# 1. 말발굽 소리 강제 종료
+	if run_sound and run_sound.playing:
+		run_sound.stop()
+		
 	print(name, " (플레이어 기마병) 유닛이 쓰러집니다... 게임 오버!")
 	velocity = Vector2.ZERO
 	
@@ -102,39 +135,55 @@ func die():
 		set_collision_layer_value(i, false)
 		set_collision_mask_value(i, false)
 		
-	# 데스 전용 스프라이트로 교체 후 애니메이션 재생
+	# 데스 스프라이트로 교체 (안 보일 수도 있지만 일단 처리)
 	if main_sprite: main_sprite.visible = false
 	if death_sprite: death_sprite.visible = true
 	
-	if anim_player and anim_player.has_animation("Death"):
-		anim_player.play("Death")
+	# 비명 소리를 틀자마자 애니메이션을 기다리지 않고 넘어갑니다!
+	var death_sound = get_node_or_null("DeathSound")
+	if death_sound:
+		death_sound.play(0.7)
 		
-	# 플레이어가 죽었으므로 메인 씬의 game_over 함수를 호출합니다!
-	# 아군 기지가 부서진 것과 동일하게 패배 처리하기 위해 true를 넘겨줍니다.
+	if anim_player and anim_player.has_animation("Death"):
+		anim_player.play("Death") # 실행만 시켜둠
+		
+	#기다리지 않고 곧바로 메인 씬의 game_over를 불러 패배 창을 띄웁니다!
 	if get_tree().current_scene.has_method("game_over"):
-		get_tree().current_scene.game_over(true)
+		get_tree().current_scene.game_over(true, true)
 		
-	# 애니메이션이 끝나는 것을 기다린 후 삭제
-	if anim_player and anim_player.has_animation("Death"):
-		await anim_player.animation_finished
+
+	if death_sound:
+		await death_sound.finished
 		
 	queue_free()
 	
+# 💡 [추가] Q 스킬 (오라 버프) 효과음 재생!
 func turn_on_aura():
 	is_aura_active = true
+	
+	if skill_sound:
+		skill_sound.stream = preload("res://BGM/Skill_Q.mp3")
+		skill_sound.play()
+		
 	queue_redraw() # 화면에 다시 그리도록(업데이트) 엔진에 요청
 
 func turn_off_aura():
 	is_aura_active = false
 	queue_redraw()
 
+# 💡 [추가] W 스킬 (가시 갑옷) 효과음 재생! (부모의 함수를 가져와 소리만 얹음)
+func receive_thorn_buff():
+	super.receive_thorn_buff() # 부모(base_unit.gd)에 작성된 가시 갑옷 효과 발동
+	
+	if skill_sound:
+		skill_sound.stream = preload("res://BGM/Skill_W.mp3")
+		skill_sound.play()
 
 # 고도 엔진이 화면을 그릴 때 자동으로 실행되는 내장 함수입니다.
 func _draw():
 	
-	# 💡 1. [W 스킬] 장군의 중심에서 사방으로 뻗어나가는 360도 원형 파동
+	# 1. [W 스킬] 장군의 중심에서 사방으로 뻗어나가는 360도 원형 파동
 	if is_thorn_buffed:
-		# 바닥이 아니라 장군(말)의 몸통 한가운데로 중심점을 올립니다 (-50)
 		var center_pos = Vector2(100, -100) 
 		var max_radius = 220.0 
 		var wave_speed = 300.0 
@@ -146,32 +195,22 @@ func _draw():
 			var alpha = 1.0 - (current_radius / max_radius)
 			var wave_color = Color(1.0, 0.2, 0.2, alpha * 0.9) 
 			
-			# 💡 시작 각도 0, 끝 각도 TAU로 설정하여 완벽한 원을 그립니다!
-			# 원이 크므로 선명하게 보이도록 조각 수(128)를 늘려줍니다.
 			draw_arc(center_pos, current_radius, 0, TAU, 128, wave_color, 5.0, true)
 	
 	if is_aura_active:
-		# 1. 💡 장군 스프라이트 위치에 맞게 중심점 이동 (오른쪽으로 100, 위로 살짝)
-		# (스크린샷을 바탕으로 말의 발밑에 딱 맞게 좌표를 수정했습니다!)
 		var center_offset = Vector2(100, -20)
 		draw_set_transform(center_offset, 0, Vector2(1.0, 0.4))
 		
-		var max_radius = 500.0 # 버프 최대 반경 (300 반경 / 0.6 스케일)
-		var speed = 300.0      # ⚡ 원이 바깥으로 퍼져나가는 속도
+		var max_radius = 500.0 
+		var speed = 300.0      
 		
-		# 3개의 물결(원)이 시차를 두고 퍼져나가도록 만듭니다.
 		for i in range(3):
-			# fmod를 사용해 원이 계속 커지다가 max_radius에 닿으면 다시 0부터 커지게 합니다.
 			var current_radius = fmod(time_passed * speed + (i * (max_radius / 3.0)), max_radius)
-			
-			# 원이 바깥으로 퍼질수록 점점 투명해지도록(자연스럽게 사라지도록) 처리
 			var alpha = 1.0 - (current_radius / max_radius)
 			var current_color = Color(0.4, 0.8, 1.0, alpha)
 			
-			# 테두리 그리기
 			draw_arc(Vector2.ZERO, current_radius, 0, TAU, 128, current_color, 4.0, true)
 			
-		# 그림 그리기가 끝난 후 변환 초기화
 		draw_set_transform(Vector2.ZERO, 0, Vector2.ONE)
 		
 
@@ -183,17 +222,13 @@ func create_dash_trail():
 	trail.frame = main_sprite.frame
 	trail.flip_h = main_sprite.flip_h
 	
-	# 위치와 크기를 현재 장군의 스프라이트와 완전히 똑같이 맞춥니다.
 	trail.global_transform = main_sprite.global_transform
 	
-	# 💡 핵심! 장군 뒤로 깔리게 만들고(z_index), 그림처럼 영롱한 시안색(Cyan)으로 덮어씌웁니다.
 	trail.z_index = -1
-	trail.modulate = Color(1.0, 0.9, 0.0, 0.6) # R, G, B, 투명도(60%)
+	trail.modulate = Color(1.0, 0.9, 0.0, 0.6) 
 	
-	# 게임 화면(메인 씬)에 잔상을 추가합니다.
 	get_tree().current_scene.add_child(trail)
 	
-	# 0.3초 동안 꼬리가 서서히 투명해지다가 공기 중으로 흩어지게(삭제) 만듭니다.
 	var tween = create_tween()
 	tween.tween_property(trail, "modulate:a", 0.0, 0.3)
 	tween.tween_callback(trail.queue_free)

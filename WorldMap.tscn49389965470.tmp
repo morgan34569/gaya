@@ -258,19 +258,13 @@ horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="SettingButton" type="Button" parent="CanvasLayer" unique_id=407407497]
-modulate = Color(2.454227, 2.454227, 2.454227, 0.9843137)
 anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
-offset_left = -45.0
-offset_top = -7.0
-offset_right = 27.0
-offset_bottom = 65.0
+offset_left = -72.0
+offset_bottom = 72.0
 grow_horizontal = 0
-scale = Vector2(0.9, 0.9)
-theme_override_colors/icon_normal_color = Color(1, 0.9098039, 0.10980392, 1)
 icon = ExtResource("7_bmh0k")
-flat = true
 
 [node name="Cities" type="Node2D" parent="." unique_id=1664016325]
 
@@ -331,7 +325,6 @@ wait_time = 3.0
 autostart = true
 
 [node name="BGMPlayer" type="AudioStreamPlayer" parent="." unique_id=527252367]
-process_mode = 3
 stream = ExtResource("8_psonl")
 volume_db = 1.0
 autoplay = true

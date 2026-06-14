@@ -19,8 +19,11 @@ var w_skill_cooldown: float = 0.0
 var r_skill_cooldown: float = 0.0
 var is_raining_arrows: bool = false
 var arrow_duration: float = 0.0
+var spawn_tween: Tween
 
-
+@onready var spawn_sound = get_node_or_null("SpawnSound")
+@onready var building_destroy_sound = $BuildingDestroySound
+@onready var notification_label = $CanvasLayer/NotificationLabel
 @onready var game_over_panel = get_node_or_null("CanvasLayer/GameOverPanel")
 @onready var result_label = get_node_or_null("CanvasLayer/GameOverPanel/ResultLabel")
 @onready var food_label = get_node_or_null("CanvasLayer/TopBarContainer/FoodLabel")
@@ -30,6 +33,8 @@ var arrow_duration: float = 0.0
 @onready var retreat_button = get_node_or_null("CanvasLayer/GameOverPanel/RetreatButton")
 @onready var skill_cooldown_timer = $SkillCooldownTimer
 @onready var general_node = $CharacterBody2D
+@onready var ui_click_sound = get_node_or_null("UIClickSound")
+
 
 func _ready():
 	food_per_second = 10 + (Global.farm_level * 5)
@@ -89,6 +94,18 @@ func update_stage_ui():
 # --- [병사 소환 (강화 레벨 적용)] ---
 
 func _on_warrior_button_pressed() -> void:
+	if spawn_sound:
+		if spawn_tween and spawn_tween.is_valid():
+			spawn_tween.kill()
+		spawn_sound.volume_db = 0.0 
+		spawn_sound.pitch_scale = randf_range(0.9, 1.1) 
+		spawn_sound.play(1.5)
+		spawn_tween = create_tween()
+		spawn_tween.tween_interval(1.0) 
+		spawn_tween.tween_property(spawn_sound, "volume_db", -80.0, 1.2)
+		
+		# 소리가 완전히 줄어들면 스피커를 깔끔하게 정지시킵니다.
+		spawn_tween.tween_callback(spawn_sound.stop)
 	var cost = 30 
 	if current_food >= cost:
 		current_food -= cost 
@@ -104,9 +121,19 @@ func _on_warrior_button_pressed() -> void:
 		new_warrior.global_position = $AllyBase/SpawnPoint.global_position
 		add_child(new_warrior)
 	else:
-		print("전사를 소환하기엔 식량이 부족합니다!")
+		show_notification("전사를 소환하기엔 식량이 부족합니다!(30 필요)")	
 
 func _on_lancer_button_pressed() -> void:
+	if spawn_sound:
+		if spawn_tween and spawn_tween.is_valid():
+			spawn_tween.kill()
+		spawn_sound.volume_db = 0.0 
+		spawn_sound.pitch_scale = randf_range(0.9, 1.1) 
+		spawn_sound.play(1.5)
+		spawn_tween = create_tween()
+		spawn_tween.tween_interval(1.0) 
+		spawn_tween.tween_property(spawn_sound, "volume_db", -80.0, 1.2)
+		spawn_tween.tween_callback(spawn_sound.stop)
 	var cost = 40 
 	if current_food >= cost:
 		current_food -= cost
@@ -122,9 +149,19 @@ func _on_lancer_button_pressed() -> void:
 		new_lancer.global_position = $AllyBase/SpawnPoint.global_position
 		add_child(new_lancer)
 	else:
-		print("창병을 소환하기엔 식량이 부족합니다!")
+		show_notification("창병을 소환하기엔 식량이 부족합니다!(40 필요)")	
 
 func _on_button_pressed() -> void: # (궁병 버튼)
+	if spawn_sound:
+		if spawn_tween and spawn_tween.is_valid():
+			spawn_tween.kill()
+		spawn_sound.volume_db = 0.0 
+		spawn_sound.pitch_scale = randf_range(0.9, 1.1) 
+		spawn_sound.play(1.5)
+		spawn_tween = create_tween()
+		spawn_tween.tween_interval(1.0) 
+		spawn_tween.tween_property(spawn_sound, "volume_db", -80.0, 1.2)
+		spawn_tween.tween_callback(spawn_sound.stop)
 	var cost = 50 
 	if current_food >= cost:
 		current_food -= cost
@@ -140,17 +177,38 @@ func _on_button_pressed() -> void: # (궁병 버튼)
 		new_archer.global_position = $AllyBase/SpawnPoint.global_position
 		add_child(new_archer)
 	else:
-		print("궁수를 소환하기엔 식량이 부족합니다!")
+		show_notification("궁수를 소환하기엔 식량이 부족합니다!(50 필요)")
 
 
 # --- [게임 오버 및 시스템 함수] ---
-func game_over(is_ally_base_destroyed: bool):
+func game_over(is_ally_base_destroyed: bool, is_player_dead: bool = false):
 	is_victory = not is_ally_base_destroyed
+	
+	var battle_bgm = get_node_or_null("BattleBGM") 
+	if battle_bgm:
+		battle_bgm.stop()
+	var result_bgm = get_node_or_null("ResultBGM")
+	if result_bgm:
+		if is_victory:
+			# 승리했을 때의 BGM 파일 경로
+			result_bgm.stream = preload("res://BGM/victory.mp3") 
+		else:
+			# 패배했을 때의 BGM 파일 경로
+			result_bgm.stream = preload("res://BGM/defeat.mp3") 
+			
+		result_bgm.play()
+	
+	# 플레이어가 죽어서 끝난 게 "아닐 때만" 건물 파괴음 재생!
+	if not is_player_dead:
+		var building_destroy_sound = get_node_or_null("BuildingDestroySound")
+		if building_destroy_sound:
+			building_destroy_sound.play()
+
 	if game_over_panel and result_label:
 		if is_ally_base_destroyed:
 			# 💀 패배 처리
 			if Global.current_target_city in ["Silla_Invasion", "Baekje_Invasion", "Goguryeo_Invasion"]:
-				var penalty = 0.20 # 20% 약탈 (원하는 수치로 변경 가능)
+				var penalty = 0.20 # 20% 약탈 
 				
 				var lost_gold = int(Global.total_gold * penalty)
 				var lost_wood = int(Global.total_wood * penalty)
@@ -162,14 +220,20 @@ func game_over(is_ally_base_destroyed: bool):
 				Global.total_food -= lost_food
 				Global.total_iron -= lost_iron
 				
-				result_label.text = "DEFEAT\n침공을 막지 못해 자원을 약탈당했습니다!\n(모든 자원 20% 손실)"
+				# 장군이 죽었을 때 텍스트를 다르게 하고 싶다면 여기서 분기 가능!
+				if is_player_dead:
+					result_label.text = "DEFEAT\n장군이 전사하여 전선이 무너졌습니다!\n(모든 자원 20% 손실)"
+				else:
+					result_label.text = "DEFEAT\n침공을 막지 못해 자원을 약탈당했습니다!\n(모든 자원 20% 손실)"
+					
 				print("🔥 약탈당한 자원 - 금:", lost_gold, " 목재:", lost_wood, " 식량:", lost_food, " 철:", lost_iron)
 			
-			# ⚔️ 일반 가야 정벌전에서 패배했다면? (약탈 없음)
 			else:
-				result_label.text = "DEFEAT\n전투에서 패배했습니다...\n후퇴하여 전열을 가다듬겠습니까?"
+				if is_player_dead:
+					result_label.text = "DEFEAT\n장군이 전사했습니다...\n후퇴하여 전열을 가다듬겠습니까?"
+				else:
+					result_label.text = "DEFEAT\n전투에서 패배했습니다...\n후퇴하여 전열을 가다듬겠습니까?"
 
-			# 공통 UI 처리 (다시하기, 후퇴 버튼 보이기)
 			if retry_button: 
 				retry_button.visible = true
 				retry_button.text = "다시하기"
@@ -178,10 +242,9 @@ func game_over(is_ally_base_destroyed: bool):
 				retreat_button.text = "월드맵 후퇴"
 				
 		else:
-			# 🛡️ 이벤트 전투 승리 (신라, 백제, 고구려 방어 성공!)
+			# 🛡️ 이벤트 전투 승리
 			if Global.current_target_city == "Silla_Invasion":
 				Global.is_silla_defeated = true
-				# 💰 신라 방어 보상 (초반부 쏠쏠한 자원)
 				Global.total_gold += 1000
 				Global.total_wood += 500
 				Global.total_food += 500
@@ -191,7 +254,6 @@ func game_over(is_ally_base_destroyed: bool):
 				
 			elif Global.current_target_city == "Baekje_Invasion":
 				Global.is_baekje_defeated = true
-				# 💰 백제 방어 보상 (중반부 폭발적인 자원)
 				Global.total_gold += 2000
 				Global.total_wood += 1000
 				Global.total_food += 1000
@@ -201,23 +263,20 @@ func game_over(is_ally_base_destroyed: bool):
 				
 			elif Global.current_target_city == "Goguryeo_Invasion":
 				Global.is_goguryeo_defeated = true
-				# 💰 고구려 방어 보상 (엔딩 직전 상징적인 초대박 보상)
 				Global.total_gold += 10000
 				Global.total_wood += 5000
 				Global.total_food += 5000
 				Global.total_iron += 3000
-				result_label.text = "🌟 엔딩(Ending) 🌟\n고구려 대군마저 꺾었습니다!\n이제 가야는 하나의 나라로 성장했고 그 누구도 넘볼 수 없습니다!"
+				result_label.text = "🌟 엔딩(Ending) 🌟\n고구려 대군마저 꺾었습니다!\n이제 가야는 하나의 나라로 성장했고\n 그 누구도 넘볼 수 없습니다!"
 				if retry_button: retry_button.text = "월드맵 귀환"
 				
-			# ⚔️ 일반 가야 점령 전투 승리 (기존 로직 유지)
+			# ⚔️ 일반 가야 점령 전투 승리
 			else:
 				result_label.text = "VICTORY\n승리했습니다!! 🎉"
 				if retry_button: retry_button.text = "월드맵 귀환"
 				
-				# 영토 확장 및 전리품 획득 로직
 				if Global.current_target_city != "" and not Global.unlocked_territories.has(Global.current_target_city):
 					Global.unlocked_territories.append(Global.current_target_city)
-					print(Global.current_target_city, " 점령 완료!")
 					
 					var conquered_count = Global.unlocked_territories.size() - 1
 					var reward_multiplier = 1.0 + (conquered_count * 0.5) 
@@ -231,10 +290,9 @@ func game_over(is_ally_base_destroyed: bool):
 					Global.total_wood += reward_wood
 					Global.total_food += reward_food
 					Global.total_iron += reward_iron
-					
-					print("🎁 단계별 전리품 획득! 금:", reward_gold, " 목재:", reward_wood, " 식량:", reward_food, " 철:", reward_iron, " (보상 배율: ", reward_multiplier, "x)")
 
 		game_over_panel.visible = true
+		
 	get_tree().paused = true
 	
 func _on_enemy_spawn_timer_timeout() -> void:
@@ -250,10 +308,16 @@ func _on_enemy_spawn_timer_timeout() -> void:
 
 # 게임 결과 창의 버튼(다시하기/월드맵 귀환)을 눌렀을 때 실행되는 함수
 func _on_retry_button_pressed() -> void:
+	if ui_click_sound: 
+		ui_click_sound.play()
+		await get_tree().create_timer(0.15).timeout
 	get_tree().paused = false 
 	get_tree().reload_current_scene()
 	
 func _on_retreat_button_pressed() -> void:
+	if ui_click_sound: 
+		ui_click_sound.play()
+		await get_tree().create_timer(0.15).timeout
 	get_tree().paused = false 
 	get_tree().change_scene_to_file("res://WorldMap.tscn")
 
@@ -400,8 +464,25 @@ func activate_w_skill():
 						node.receive_thorn_buff()
 	
 func activate_r_skill():
+	
 	r_skill_cooldown = 30.0 # 쿨타임 30초
 	is_raining_arrows = true
 	arrow_duration = 2.0    # 2초 동안 발동
+	var skill_sound = get_node_or_null("SkillSound")
+	if skill_sound:
+		skill_sound.stream = preload("res://BGM/Skill_R.mp3")
+		skill_sound.play()
 	
 	print("🏹 천벌의 화살비 발동!! 하늘에서 화살이 쏟아집니다!")
+	
+func show_notification(message: String):
+	notification_label.text = message
+	notification_label.visible = true
+	notification_label.modulate.a = 1.0 
+	var tween = create_tween()
+	tween.tween_interval(2.0) # 2초 동안 화면에 머무름
+	tween.tween_property(notification_label, "modulate:a", 0.0, 1.0)
+
+func _on_setting_button_pressed() -> void:
+	if ui_click_sound: ui_click_sound.play()
+	SettingUI.open_settings()

@@ -4,6 +4,8 @@
 [ext_resource type="Script" uid="uid://crwlvuh7xvgx3" path="res://archer.gd" id="1_knv3h"]
 [ext_resource type="Texture2D" uid="uid://1xlkape0x8lv" path="res://asset/solider/Archer_Blue.png" id="1_rpy33"]
 [ext_resource type="Texture2D" uid="uid://chtfsrfefi8k5" path="res://asset/solider/Dead.png" id="3_tgbv5"]
+[ext_resource type="AudioStream" uid="uid://byl16nn5vntk6" path="res://BGM/궁병 공격.mp3" id="5_qnjvk"]
+[ext_resource type="AudioStream" uid="uid://c551dc5v77ah5" path="res://BGM/Death.mp3" id="6_ll7ho"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_r2et3"]
 size = Vector2(75, 86)
@@ -141,3 +143,12 @@ offset_top = -74.0
 offset_right = 37.0
 offset_bottom = -47.0
 theme_override_styles/fill = SubResource("StyleBoxFlat_tgbv5")
+
+[node name="AttackSound" type="AudioStreamPlayer2D" parent="." index="6" unique_id=160397507]
+stream = ExtResource("5_qnjvk")
+max_polyphony = 5
+
+[node name="DeathSound" type="AudioStreamPlayer2D" parent="." index="7" unique_id=1105150075]
+stream = ExtResource("6_ll7ho")
+volume_db = 5.0
+max_polyphony = 5

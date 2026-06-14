@@ -11,17 +11,23 @@ config_version=5
 [application]
 
 config/name="gaya"
-run/main_scene="uid://csnni25ngt134"
+run/main_scene="uid://jbkb1drp3fxh"
 config/features=PackedStringArray("4.6", "Forward Plus")
 config/icon="res://icon.svg"
+
+[audio]
+
+buses/default_bus_layout="uid://r05j2y0soikg"
 
 [autoload]
 
 Global="*uid://b108vjwtx7hn5"
+SettingUI="*uid://dp4ca6ct3b8v1"
 
 [display]
 
 mouse_cursor/custom_image="uid://b3v400vxwcrg7"
+mouse_cursor/custom_image_hotspot=Vector2(16, 16)
 
 [global_group]
 

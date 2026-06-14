@@ -9,7 +9,8 @@ var arrow_scene = preload("res://arrow.tscn")
 #AnimationPlayer의 애니메이션 도중 특정 프레임에 맞춰 이 함수를 실행하게 됩니다.
 # ---------------------------------------------------------
 func shoot_arrow():
-
+	
+	$AttackSound.play()
 	# 1. 화살 인스턴스(복제본) 생성
 	var arrow = arrow_scene.instantiate()
 	

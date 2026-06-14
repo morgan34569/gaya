@@ -1,0 +1,73 @@
+[gd_scene format=3 uid="uid://jbkb1drp3fxh"]
+
+[ext_resource type="Script" uid="uid://c14fq14uobbl7" path="res://title_screen.gd" id="1_ak2if"]
+[ext_resource type="Texture2D" uid="uid://bgl4yi2a0a0qg" path="res://asset/게임인트로 화면.png" id="1_v6p8y"]
+[ext_resource type="AudioStream" uid="uid://budfm52ent78f" path="res://BGM/switch.mp3" id="3_ig5kc"]
+[ext_resource type="AudioStream" uid="uid://ceguw2qs4fkub" path="res://대항해(Sailing the Dream).mp3" id="4_05l2w"]
+
+[node name="TitleScreen" type="Control" unique_id=768885313]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_ak2if")
+
+[node name="TextureRect" type="TextureRect" parent="." unique_id=1446061919]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -4.0
+offset_right = 4.0
+offset_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("1_v6p8y")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="StartButton" type="Button" parent="." unique_id=1309803999]
+custom_minimum_size = Vector2(100, 50)
+layout_mode = 0
+offset_left = 441.0
+offset_top = 528.0
+offset_right = 709.0
+offset_bottom = 597.0
+flat = true
+
+[node name="SettingButton" type="Button" parent="." unique_id=975891182]
+z_index = 1
+custom_minimum_size = Vector2(50, 50)
+layout_mode = 0
+offset_left = 1008.0
+offset_top = 24.0
+offset_right = 1063.0
+offset_bottom = 76.0
+flat = true
+
+[node name="ExitButtton" type="Button" parent="." unique_id=837221163]
+custom_minimum_size = Vector2(50, 50)
+layout_mode = 0
+offset_left = 1081.0
+offset_top = 20.0
+offset_right = 1135.0
+offset_bottom = 76.0
+flat = true
+
+[node name="UIClickSound" type="AudioStreamPlayer" parent="." unique_id=1157758302]
+process_mode = 3
+stream = ExtResource("3_ig5kc")
+bus = &"SFX"
+
+[node name="TitleBGM" type="AudioStreamPlayer" parent="." unique_id=60309804]
+process_mode = 3
+stream = ExtResource("4_05l2w")
+autoplay = true
+bus = &"BGM"
+
+[connection signal="pressed" from="StartButton" to="." method="_on_start_button_pressed"]
+[connection signal="pressed" from="SettingButton" to="." method="_on_setting_button_pressed"]
+[connection signal="pressed" from="ExitButtton" to="." method="_on_quit_button_pressed"]

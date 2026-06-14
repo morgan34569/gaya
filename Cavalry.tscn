@@ -4,6 +4,10 @@
 [ext_resource type="Texture2D" uid="uid://pimwocjor45k" path="res://asset/solider/Player.png" id="2_1rbgx"]
 [ext_resource type="Script" uid="uid://bgosyxu5s30fd" path="res://player_cavalry.gd" id="2_m61en"]
 [ext_resource type="Texture2D" uid="uid://chtfsrfefi8k5" path="res://asset/solider/Dead.png" id="4_s87lh"]
+[ext_resource type="AudioStream" uid="uid://b6efpnio6o7fk" path="res://BGM/기마병 일반 공격.mp3" id="5_kkyaw"]
+[ext_resource type="AudioStream" uid="uid://fiio7dtgsjev" path="res://BGM/Scream.mp3" id="6_qs3a6"]
+[ext_resource type="AudioStream" uid="uid://du7f8vsc7fk6k" path="res://BGM/말발굽.mp3" id="7_ai054"]
+[ext_resource type="AudioStream" uid="uid://crkccyogjd3c4" path="res://BGM/데미지 입을 때.mp3" id="8_qs3a6"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_m61en"]
 size = Vector2(255, 291)
@@ -129,8 +133,7 @@ bg_color = Color(0.54509807, 0.7647059, 0.2901961, 0.7058824)
 [node name="Player" unique_id=413328867 instance=ExtResource("1_g4c06")]
 scale = Vector2(0.6, 0.6)
 script = ExtResource("2_m61en")
-max_hp = 1000
-damage = 50
+max_hp = 200
 
 [node name="Sprite2D" parent="." index="0" unique_id=1173438352]
 position = Vector2(94.25, -147.7344)
@@ -166,3 +169,24 @@ offset_top = -365.0
 offset_right = 210.0
 offset_bottom = -338.0
 theme_override_styles/fill = SubResource("StyleBoxFlat_s87lh")
+
+[node name="AttackSound" type="AudioStreamPlayer2D" parent="." index="7" unique_id=2275592]
+stream = ExtResource("5_kkyaw")
+max_polyphony = 5
+
+[node name="DeathSound" type="AudioStreamPlayer2D" parent="." index="8" unique_id=1341756745]
+process_mode = 3
+stream = ExtResource("6_qs3a6")
+volume_db = 3.0
+max_polyphony = 5
+
+[node name="RunSound" type="AudioStreamPlayer2D" parent="." index="9" unique_id=196334009]
+stream = ExtResource("7_ai054")
+max_polyphony = 5
+
+[node name="HitSound" type="AudioStreamPlayer2D" parent="." index="10" unique_id=1055707996]
+stream = ExtResource("8_qs3a6")
+max_polyphony = 5
+
+[node name="SkillSound" type="AudioStreamPlayer2D" parent="." index="11" unique_id=1568007275]
+max_polyphony = 5
