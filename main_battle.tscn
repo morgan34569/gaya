@@ -10,12 +10,20 @@
 [ext_resource type="Texture2D" uid="uid://bql54mraw2ob" path="res://asset/Buttons/Button_Disable_3Slides.png" id="7_thwl8"]
 [ext_resource type="Texture2D" uid="uid://dwjoxl4de3a1h" path="res://asset/Terrain/Tileset/Tilemap_color3.png" id="7_wkuru"]
 [ext_resource type="Texture2D" uid="uid://bvyufgsfe08k4" path="res://asset/Icons/Regular_02.png" id="8_lc7rc"]
+[ext_resource type="Texture2D" uid="uid://b4htw27c2dmsh" path="res://asset/E_icon.png" id="9_0csqo"]
 [ext_resource type="Texture2D" uid="uid://dg3y57j1wjnfm" path="res://asset/Terrain/Tileset/Tilemap_color1.png" id="9_8fr6l"]
+[ext_resource type="Script" uid="uid://dqgsldj2in5uu" path="res://skill_e_ui.gd" id="10_asuy3"]
 [ext_resource type="Texture2D" uid="uid://bamf63hhls01n" path="res://asset/Terrain/Decorations/Clouds/Clouds_01.png" id="10_thwl8"]
 [ext_resource type="Texture2D" uid="uid://co7qvi8sj48mk" path="res://asset/Terrain/Decorations/Clouds/Clouds_02.png" id="11_8fr6l"]
+[ext_resource type="Texture2D" uid="uid://pa8lsflud7oy" path="res://asset/Q_icon.png" id="11_30q40"]
+[ext_resource type="Texture2D" uid="uid://hngfsweiuttk" path="res://asset/W_icon.png" id="12_6y624"]
+[ext_resource type="Script" uid="uid://bvnojkgo8rcmj" path="res://skill_q_ui.gd" id="12_i4isq"]
 [ext_resource type="Texture2D" uid="uid://i22fnoesdi5q" path="res://asset/Terrain/Decorations/Clouds/Clouds_03.png" id="12_thwl8"]
+[ext_resource type="Texture2D" uid="uid://b20b8qj7r1bo2" path="res://asset/R_icon.png" id="13_i4isq"]
 [ext_resource type="Texture2D" uid="uid://ctdarjqu63ah5" path="res://asset/Terrain/Tileset/sky.jpg" id="13_y54ie"]
+[ext_resource type="Script" uid="uid://5itss6yxhtny" path="res://skill_w_ui.gd" id="14_i4isq"]
 [ext_resource type="AudioStream" uid="uid://b83i1ec28d0hd" path="res://Glorious morning.mp3" id="15_y54ie"]
+[ext_resource type="Script" uid="uid://c6a506uklrj3c" path="res://skill_r_ui.gd" id="16_emt8i"]
 [ext_resource type="AudioStream" uid="uid://bk1n4w8dmbku0" path="res://BGM/skill_R.mp3" id="16_klgvc"]
 [ext_resource type="AudioStream" uid="uid://h8g1irkcuamh" path="res://BGM/broken.mp3" id="17_q3b0y"]
 [ext_resource type="AudioStream" uid="uid://budfm52ent78f" path="res://BGM/switch.mp3" id="18_1vute"]
@@ -2025,7 +2033,7 @@ shape = SubResource("RectangleShape2D_6p3hu")
 wait_time = 3.0
 autostart = true
 
-[node name="CharacterBody2D" parent="." unique_id=413328867 instance=ExtResource("5_0hae8")]
+[node name="Cavalry" parent="." unique_id=413328867 instance=ExtResource("5_0hae8")]
 z_index = 2
 position = Vector2(189, 649)
 
@@ -2155,6 +2163,104 @@ offset_right = 1155.0
 offset_bottom = 78.0
 icon = ExtResource("8_lc7rc")
 flat = true
+
+[node name="SkillContainer" type="HBoxContainer" parent="CanvasLayer" unique_id=226536781]
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -60.0
+grow_horizontal = 2
+grow_vertical = 0
+
+[node name="SkillQ_Icon" type="TextureRect" parent="CanvasLayer/SkillContainer" unique_id=1823131948]
+custom_minimum_size = Vector2(120, 120)
+layout_mode = 2
+texture = ExtResource("11_30q40")
+expand_mode = 1
+stretch_mode = 5
+script = ExtResource("12_i4isq")
+
+[node name="CooldownBar" type="TextureProgressBar" parent="CanvasLayer/SkillContainer/SkillQ_Icon" unique_id=1955936220]
+custom_minimum_size = Vector2(60, 60)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+max_value = 10.0
+step = 0.01
+fill_mode = 4
+nine_patch_stretch = true
+texture_progress = ExtResource("11_30q40")
+tint_progress = Color(0, 0, 0, 0.47058824)
+
+[node name="SkillW_Icon" type="TextureRect" parent="CanvasLayer/SkillContainer" unique_id=121387030]
+custom_minimum_size = Vector2(120, 120)
+layout_mode = 2
+texture = ExtResource("12_6y624")
+expand_mode = 1
+stretch_mode = 5
+script = ExtResource("14_i4isq")
+
+[node name="CooldownBar" type="TextureProgressBar" parent="CanvasLayer/SkillContainer/SkillW_Icon" unique_id=459388326]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+max_value = 10.0
+step = 0.01
+fill_mode = 4
+nine_patch_stretch = true
+texture_progress = ExtResource("12_6y624")
+tint_progress = Color(0, 0, 0, 0.47058824)
+
+[node name="SkillE_Icon" type="TextureRect" parent="CanvasLayer/SkillContainer" unique_id=1830169207]
+custom_minimum_size = Vector2(120, 120)
+layout_mode = 2
+texture = ExtResource("9_0csqo")
+expand_mode = 1
+stretch_mode = 5
+script = ExtResource("10_asuy3")
+
+[node name="CooldownBar" type="TextureProgressBar" parent="CanvasLayer/SkillContainer/SkillE_Icon" unique_id=32344951]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+max_value = 10.0
+step = 0.01
+fill_mode = 4
+nine_patch_stretch = true
+texture_progress = ExtResource("9_0csqo")
+tint_progress = Color(0, 0, 0, 0.47058824)
+
+[node name="SkillR_Icon" type="TextureRect" parent="CanvasLayer/SkillContainer" unique_id=544221614]
+custom_minimum_size = Vector2(120, 120)
+layout_mode = 2
+texture = ExtResource("13_i4isq")
+expand_mode = 1
+stretch_mode = 5
+script = ExtResource("16_emt8i")
+
+[node name="CooldownBar" type="TextureProgressBar" parent="CanvasLayer/SkillContainer/SkillR_Icon" unique_id=1828033149]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+max_value = 10.0
+step = 0.01
+fill_mode = 4
+nine_patch_stretch = true
+texture_progress = ExtResource("13_i4isq")
+tint_progress = Color(0, 0, 0, 0.47058824)
 
 [node name="GoldTimer" type="Timer" parent="." unique_id=1459139314]
 autostart = true

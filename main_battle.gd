@@ -15,12 +15,14 @@ var enemy_stat_multiplier: float = 1.0
 var ally_buff_multiplier: float = 1.0
 var buff_radius: float = 300.0
 var aura_duration_left: float = 0.0
+var q_skill_cooldown: float = 0.0
 var w_skill_cooldown: float = 0.0 
 var r_skill_cooldown: float = 0.0
 var is_raining_arrows: bool = false
 var arrow_duration: float = 0.0
 var spawn_tween: Tween
 
+@onready var bgm_player = $BGMPlayer
 @onready var spawn_sound = get_node_or_null("SpawnSound")
 @onready var building_destroy_sound = $BuildingDestroySound
 @onready var notification_label = $CanvasLayer/NotificationLabel
@@ -32,7 +34,7 @@ var spawn_tween: Tween
 @onready var retry_button = get_node_or_null("CanvasLayer/GameOverPanel/RetryButton")
 @onready var retreat_button = get_node_or_null("CanvasLayer/GameOverPanel/RetreatButton")
 @onready var skill_cooldown_timer = $SkillCooldownTimer
-@onready var general_node = $CharacterBody2D
+@onready var general_node = $Cavalry
 @onready var ui_click_sound = get_node_or_null("UIClickSound")
 
 
@@ -184,18 +186,19 @@ func _on_button_pressed() -> void: # (궁병 버튼)
 func game_over(is_ally_base_destroyed: bool, is_player_dead: bool = false):
 	is_victory = not is_ally_base_destroyed
 	
-	var battle_bgm = get_node_or_null("BattleBGM") 
-	if battle_bgm:
-		battle_bgm.stop()
+	var bgm_player = get_node_or_null("BGMplayer") 
+	if bgm_player:
+		bgm_player.stop()
+		bgm_player.process_mode = Node.PROCESS_MODE_DISABLED # 멈추고 비활성화
+	
+	# 2. 결과창 BGM 처리
 	var result_bgm = get_node_or_null("ResultBGM")
 	if result_bgm:
+		result_bgm.process_mode = Node.PROCESS_MODE_ALWAYS # 결과음은 들려야 하므로 Always
 		if is_victory:
-			# 승리했을 때의 BGM 파일 경로
 			result_bgm.stream = preload("res://BGM/victory.mp3") 
 		else:
-			# 패배했을 때의 BGM 파일 경로
 			result_bgm.stream = preload("res://BGM/defeat.mp3") 
-			
 		result_bgm.play()
 	
 	# 플레이어가 죽어서 끝난 게 "아닐 때만" 건물 파괴음 재생!
@@ -358,13 +361,14 @@ func get_enemy_name() -> String:
 		
 func _process(delta):
 	# 1. 스킬 발동 (Q 키 입력)
-	if Input.is_action_just_pressed("skill_q"):
-		if skill_cooldown_timer.is_stopped():
-			activate_skill()
+	if q_skill_cooldown > 0:
+		q_skill_cooldown -= delta
 			
 	if w_skill_cooldown > 0:
 		w_skill_cooldown -= delta
 		
+	if Input.is_action_just_pressed("skill_q") and q_skill_cooldown <= 0:
+		activate_skill()
 	if Input.is_action_just_pressed("skill_w") and w_skill_cooldown <= 0:
 		activate_w_skill()
 
@@ -431,6 +435,7 @@ func _process(delta):
 			is_raining_arrows = false
 
 func activate_skill():
+	q_skill_cooldown = 10.0
 	var duration = 5.0 + ((Global.gen_q_level - 1) * 1.0) 
 	aura_duration_left = duration     
 	print("📣 장군의 함성 발동! ", duration, "초간 주변 아군 지속 강화! (반경: ", buff_radius, ")")
